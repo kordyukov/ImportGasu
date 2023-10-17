@@ -32,4 +32,11 @@ left join nsi.nsi_application_submit_method appsubmit on la.delivery_method_id =
 left join profile.contragent applicant on applicant.id = la.contragent_id
 left join nsi.nsi_contragent_type contype on applicant.contragent_type_id = contype.id
 left join public.b4_state b4status on la.state_id = b4status.id
-where la.object_deleted = false;
+where la.object_deleted = false and la.registration_date between '2023-10-15 00:00:00.000000'
+    and '2023-10-16 23:59:59.999999' order by nsiapp.name, con.full_name;
+
+select  max(la.registration_date) from license.application la
+select  max(la.object_create_date) from license.application la
+select  max(la.object_edit_date) from license.application la
+select  max(la.create_date) from license.application la
+select  max(la.decide_date) from license.application la
