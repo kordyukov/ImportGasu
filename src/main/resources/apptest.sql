@@ -1,4 +1,4 @@
-select distinct on(la.input_application_number) la.input_application_number AS "Уникальный номер заявления",
+select la.input_application_number AS "Уникальный номер заявления",
        nsiapp.name AS "Вид заявления",
        nsiact.id AS "Идентификатор разрешительного режима",
        nsiact.name AS "Разрешительный режим",
@@ -23,25 +23,27 @@ select distinct on(la.input_application_number) la.input_application_number AS "
        b4status.name AS "Статус разрешения",
        la.version_start_date
 from license.application la
-left join nsi.nsi_application_type nsiapp on la.application_type_id = nsiapp.id
-left join profile.contragent con on la.territory_organ_id = con.id
-left join nsi.nsi_activity_kind nsiact on nsiact.id = la.activity_kind_id
-left join nsi.nsi_work_type nsiwork on nsiwork.activity_kind_id = nsiact.id
-left join public.b4_fias_address b4addr on con.legal_address_id = b4addr.id
-left join nsi.nsi_rf_subjects_codes subcode on b4addr.rf_subjects_codes_id = subcode.id
-left join nsi.nsi_application_submit_method appsubmit on la.delivery_method_id = appsubmit.id
-left join profile.contragent applicant on applicant.id = la.contragent_id
-left join nsi.nsi_contragent_type contype on applicant.contragent_type_id = contype.id
-left join public.b4_state b4status on la.state_id = b4status.id
+         ,nsi.nsi_application_type nsiapp
+         ,profile.contragent con
+         ,nsi.nsi_activity_kind nsiact
+         ,nsi.nsi_work_type nsiwork
+         ,public.b4_fias_address b4addr
+         ,nsi.nsi_rf_subjects_codes subcode
+         ,nsi.nsi_application_submit_method appsubmit
+         ,profile.contragent applicant
+         ,nsi.nsi_contragent_type contype
+         ,public.b4_state b4status
 where la.object_deleted = false
-and la.registration_date between '2023-10-15 00:00:00.000000'
-and '2023-10-16 23:59:59.999999'
-order by la.input_application_number, nsiapp.name, con.full_name;
-
-select  max(la.registration_date) from license.application la
-select  max(la.object_create_date) from license.application la
-select  max(la.object_edit_date) from license.application la
-select  max(la.create_date) from license.application la
-select  max(la.decide_date) from license.application la
-
-select * from license.application la where la.input_application_number = '04-0095/С'
+and la.application_type_id = nsiapp.id
+    and la.territory_organ_id = con.id
+    and nsiact.id = la.activity_kind_id
+    and nsiwork.activity_kind_id = nsiact.id
+    and con.legal_address_id = b4addr.id
+    and b4addr.rf_subjects_codes_id = subcode.id
+    and la.delivery_method_id = appsubmit.id
+    and applicant.id = la.contragent_id
+    and applicant.contragent_type_id = contype.id
+    and la.state_id = b4status.id
+-- and la.registration_date between '2023-10-15 00:00:00.000000'
+-- and '2023-10-16 23:59:59.999999'
+order by nsiapp.name, con.full_name limit 100;
