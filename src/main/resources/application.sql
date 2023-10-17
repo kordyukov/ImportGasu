@@ -32,4 +32,4 @@ left join nsi.nsi_application_submit_method appsubmit on la.delivery_method_id =
 left join profile.contragent applicant on applicant.id = la.contragent_id
 left join nsi.nsi_contragent_type contype on applicant.contragent_type_id = contype.id
 left join public.b4_state b4status on la.state_id = b4status.id
-where la.object_deleted = false limit 100;
+where la.object_deleted = false;
