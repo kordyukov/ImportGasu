@@ -19,7 +19,8 @@ select la.input_application_number AS "Уникальный номер заяв�
        la.object_edit_date AS "Дата принятия решения",
        la.application_number AS "Регистрационный номер разрешения",
        la.object_edit_date AS "Дата предоставления разрешения",
-       la.version_end_date AS "Дата прекращения действия разрешения (при наличии)"
+       la.version_end_date AS "Дата прекращения действия разрешения (при наличии)",
+       b4status.name AS "Статус разрешения"
 from license.application la
 left join nsi.nsi_application_type nsiapp on la.application_type_id = nsiapp.id
 left join profile.contragent con on la.territory_organ_id = con.id
