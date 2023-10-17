@@ -1,1 +1,6 @@
-
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://10.19.218.137:5432/prod_rtn_copy
+    username: postgres
+    password: u9Xb3tVE
