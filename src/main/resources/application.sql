@@ -1,4 +1,4 @@
-select la.application_number AS "Уникальный номер заявления",
+select la.input_application_number AS "Уникальный номер заявления",
        nsiapp.name AS "Вид заявления",
        nsiact.id AS "Идентификатор разрешительного режима",
        nsiact.name AS "Разрешительный режим",
@@ -14,7 +14,12 @@ select la.application_number AS "Уникальный номер заявлен�
        applicant.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
        applicant.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
        applicant.inn AS "ИНН заявителя",
-       b4status.name AS "Решение"
+       b4status.name AS "Решение",
+       b4status.name  AS "Причина отказа",
+       la.object_edit_date AS "Дата принятия решения",
+       la.application_number AS "Регистрационный номер разрешения",
+       la.object_edit_date AS "Дата предоставления разрешения",
+       la.version_end_date AS "Дата прекращения действия разрешения (при наличии)"
 from license.application la
 left join nsi.nsi_application_type nsiapp on la.application_type_id = nsiapp.id
 left join profile.contragent con on la.territory_organ_id = con.id
