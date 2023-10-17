@@ -11,7 +11,10 @@ select la.application_number AS "Уникальный номер заявлен�
        subcode.name AS "Субъект РФ",
        appsubmit.name AS "Способ направления",
        contype.name AS "Тип заявителя",
-       applicant.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП"
+       applicant.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
+       applicant.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
+       applicant.inn AS "ИНН заявителя",
+       AS "Решение"
 from license.application la
 left join nsi.nsi_application_type nsiapp on la.application_type_id = nsiapp.id
 left join profile.contragent con on la.territory_organ_id = con.id
