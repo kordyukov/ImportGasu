@@ -8,13 +8,14 @@ import ru.fors.itconsulting.importgasu.service.ImportGasuService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
 public class ImportGasuController {
     private final ImportGasuService importGasuService;
     @GetMapping("import")
-    public List<LicenseApplications> getLicenseApplications() throws IOException {
+    public List<LicenseApplications> getLicenseApplications() throws IOException, ExecutionException, InterruptedException {
         return importGasuService.getLicenseApplications();
     }
 }

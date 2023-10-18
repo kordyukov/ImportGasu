@@ -33,17 +33,17 @@ from license.application la
          ,profile.contragent applicant
          ,nsi.nsi_contragent_type contype
          ,public.b4_state b4status
-where la.object_deleted = false
-and la.application_type_id = nsiapp.id
-    and la.territory_organ_id = con.id
-    and nsiact.id = la.activity_kind_id
-    and nsiwork.activity_kind_id = nsiact.id
-    and con.legal_address_id = b4addr.id
-    and b4addr.rf_subjects_codes_id = subcode.id
-    and la.delivery_method_id = appsubmit.id
-    and applicant.id = la.contragent_id
-    and applicant.contragent_type_id = contype.id
-    and la.state_id = b4status.id
+where
+la.application_type_id = nsiapp.id
+    or la.territory_organ_id = con.id
+   or nsiact.id = la.activity_kind_id
+   or nsiwork.activity_kind_id = nsiact.id
+   or con.legal_address_id = b4addr.id
+   or b4addr.rf_subjects_codes_id = subcode.id
+   or la.delivery_method_id = appsubmit.id
+   or applicant.id = la.contragent_id
+    or applicant.contragent_type_id = contype.id
+    or la.state_id = b4status.id and la.object_deleted = false
 -- and la.registration_date between '2023-10-15 00:00:00.000000'
 -- and '2023-10-16 23:59:59.999999'
 order by nsiapp.name, con.full_name limit 100;
