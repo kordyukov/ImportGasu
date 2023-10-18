@@ -7,8 +7,8 @@ select distinct on(la.input_application_number) la.input_application_number AS "
        la.registration_date AS "Дата подачи заявления",
        con.id AS "Идентификатор разрешительного органа",
        con.full_name AS "Разрешительный орган",
-       b4addr.rf_subjects_codes_id AS "Код субъекта РФ",
-       b4addr.region_name AS "Субъект РФ",
+       sub.code AS "Код субъекта РФ",
+       sub.name AS "Субъект РФ",
        appsubmit.name AS "Способ направления",
        contype.name AS "Тип заявителя",
        applicant.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
@@ -25,7 +25,7 @@ select distinct on(la.input_application_number) la.input_application_number AS "
 from license.application la
 left join nsi.nsi_application_type nsiapp on la.application_type_id = nsiapp.id
 left join profile.contragent con on la.territory_organ_id = con.id
-right join public.b4_fias_address b4addr on con.legal_address_id = b4addr.id
+left join nsi.nsi_rf_subjects_codes sub on la.rf_subject_id = sub.id
 left join nsi.nsi_activity_kind nsiact on nsiact.id = la.activity_kind_id
 left join nsi.nsi_work_type nsiwork on nsiwork.activity_kind_id = nsiact.id
 left join nsi.nsi_application_submit_method appsubmit on la.delivery_method_id = appsubmit.id
@@ -48,3 +48,4 @@ select  max(la.decide_date) from license.application la
 select * from license.application la where state_id = 2837
 
 select * from license.application la where la.input_application_number = '04-0095/С'
+  select * from  public.b4_state b4status where b4status.name = 'Отказ в приеме документов'
