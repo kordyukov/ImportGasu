@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class ImportGasuController {
     private final ImportGasuService importGasuService;
+
     @GetMapping("import")
     public List<LicenseApplications> getLicenseApplications() throws IOException, ExecutionException, InterruptedException {
         return importGasuService.getLicenseApplications();
