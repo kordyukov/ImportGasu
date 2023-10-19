@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ImportGasuService {
     List<LicenseApplications> getLicenseApplications() throws IOException;
+    void saveResultFileApplications() throws IOException;
 
 }

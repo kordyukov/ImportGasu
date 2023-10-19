@@ -34,4 +34,4 @@ from license.application la
     left join license.decision dec on la.id = dec.application_id
     left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
     left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
-where la.object_deleted = false limit %s offset %s
+where la.object_deleted = false limit 10
