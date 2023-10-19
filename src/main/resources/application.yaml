@@ -7,4 +7,4 @@ spring:
 logging:
   level:
     org.springframework.jdbc.core: TRACE
-limit: 50000
+limit: 1500

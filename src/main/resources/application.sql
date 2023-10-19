@@ -36,7 +36,7 @@ left join license.decision dec on la.id = dec.application_id
 left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
 left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
 where la.object_deleted = false
---   and rej.name is not null
+  and rej.name is not null
 and la.registration_date between '2023-10-16 00:00:00.000000'
 and '2023-10-16 23:59:59.999999'
 order by la.input_application_number, nsiapp.name, con.full_name

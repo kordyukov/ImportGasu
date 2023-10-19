@@ -15,8 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,14 +33,17 @@ public class ImportGasuServiceImpl implements ImportGasuService {
 
         var count = jdbcTemplate.queryForObject("select count(id) from license.application", Integer.class);
 
-        if (count == null) {
-            return emptyList();
-        }
-
-        List<LicenseApplications> licenseApplications;
+        List<LicenseApplications> licenseApplications = null;
 
         for (int i = 0; i < count; i = i + limit) {
-            licenseApplications = asyncGetApplications(query.formatted(limit, i == 0 ? 0 : i - 1), result, count);
+            if (i > count) {
+                int endLimit = count - i;
+                log.info("i = {}", i);
+                licenseApplications = getApplications(query.formatted(licenseApplications.size() - 1, count - endLimit), result, count);
+                log.info("Total entries : {}, remained : {}" , licenseApplications.size() - 1, count - endLimit);
+                result.addAll(licenseApplications);
+            }
+            licenseApplications = getApplications(query.formatted(limit, i == 0 ? 0 : i - 1), result, count);
             result.addAll(licenseApplications);
         }
 
@@ -51,7 +52,7 @@ public class ImportGasuServiceImpl implements ImportGasuService {
         return result;
     }
 
-    private List<LicenseApplications> asyncGetApplications(String query, List<LicenseApplications> result, int count) {
+    private List<LicenseApplications> getApplications(String query, List<LicenseApplications> result, int count) {
         log.info("Getting rows... {} from {} rows", result.size(), count);
 
         return jdbcTemplate.query(query,
