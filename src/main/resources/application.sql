@@ -7,8 +7,13 @@ select distinct on(la.input_application_number) la.input_application_number AS "
        la.registration_date AS "Дата подачи заявления",
        con.id AS "Идентификатор разрешительного органа",
        con.full_name AS "Разрешительный орган",
-       sub.code AS "Код субъекта РФ",
-       sub.name AS "Субъект РФ",
+       (SELECT CASE WHEN sub.code is null THEN la.rf_subject_id::varchar ELSE sub.code END) AS "Код субъекта РФ",
+       (SELECT CASE WHEN sub.name is null THEN
+          (
+           select nsisub.name from nsi.nsi_rf_subjects_codes nsisub where la.rf_subject_id = nsisub.id
+          )
+          ELSE sub.name END
+       ) AS "Субъект РФ",
        appsubmit.name AS "Способ направления",
        contype.name AS "Тип заявителя",
        applicant.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
@@ -35,7 +40,6 @@ left join license.decision dec on la.id = dec.application_id
 left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
 left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
 where la.object_deleted = false
-  and rej.name is not null
 and la.registration_date between '2023-10-16 00:00:00.000000'
 and '2023-10-16 23:59:59.999999'
 order by la.input_application_number, nsiapp.name, con.full_name
