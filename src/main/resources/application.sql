@@ -1,11 +1,11 @@
 select distinct on(la.input_application_number) la.input_application_number AS "Уникальный номер заявления",
        nsiapp.name AS "Вид заявления",
-       nsiact.id AS "Идентификатор разрешительного режима",
+       nsiact.code AS "Идентификатор разрешительного режима",
        nsiact.name AS "Разрешительный режим",
        nsiwork.erul_code AS "Идентификатор разрешительного вида деятельности",
        nsiwork.erul_name AS "Разрешительный вид деятельности",
        la.registration_date AS "Дата подачи заявления",
-       con.id AS "Идентификатор разрешительного органа",
+       con.rtn_org_code AS "Идентификатор разрешительного органа",
        con.full_name AS "Разрешительный орган",
        (SELECT CASE WHEN sub.code is null THEN la.rf_subject_id::varchar ELSE sub.code END) AS "Код субъекта РФ",
        (SELECT CASE WHEN sub.name is null THEN
