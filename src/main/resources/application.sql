@@ -1,6 +1,6 @@
 select distinct on(la.input_application_number) la.input_application_number AS "Уникальный номер заявления",
        nsiapp.name AS "Вид заявления",
-       nsiact.code AS "Идентификатор разрешительного режима",
+       nsiact.erul_code AS "Идентификатор разрешительного режима",
        nsiact.name AS "Разрешительный режим",
        nsiwork.erul_code AS "Идентификатор разрешительного вида деятельности",
        nsiwork.erul_name AS "Разрешительный вид деятельности",
@@ -16,7 +16,7 @@ select distinct on(la.input_application_number) la.input_application_number AS "
        ) AS "Субъект РФ",
        appsubmit.name AS "Способ направления",
        contype.name AS "Тип заявителя",
-       applicant.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
+       (select case when applicant.full_name is null then applicant.short_name else applicant.full_name end ) AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
        applicant.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
        applicant.inn AS "ИНН заявителя",
        (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
@@ -43,3 +43,7 @@ where la.object_deleted = false
 and la.registration_date between '2023-10-16 00:00:00.000000'
 and '2023-10-16 23:59:59.999999'
 order by la.input_application_number, nsiapp.name, con.full_name
+
+
+select * from license.application la where la.registration_date between '2023-10-16 00:00:00.000000'
+                                            and '2023-10-16 23:59:59.999999'
