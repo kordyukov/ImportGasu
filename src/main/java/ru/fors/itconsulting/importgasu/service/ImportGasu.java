@@ -1,6 +1,5 @@
 package ru.fors.itconsulting.importgasu.service;
 
-import com.github.jknack.handlebars.internal.Files;
 import com.spire.data.table.DataTable;
 import com.spire.data.table.common.JdbcAdapter;
 import com.spire.xls.ExcelVersion;
@@ -8,35 +7,44 @@ import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.fors.itconsulting.importgasu.config.DateLabelFormatter;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
-import java.nio.charset.StandardCharsets;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Properties;
+
+import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
+
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ImportGasu extends JFrame implements CommandLineRunner {
-    private final JdbcTemplate jdbcTemplate;
     private final Properties properties;
-    @Value("${limit}")
-    private Integer limit;
+    private final Workbook workbook;
+    private final Worksheet sheet;
+    private final DataTable dataTable;
+    private final StringWriter writer;
+
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
     @Value("${spring.datasource.url}")
@@ -45,56 +53,47 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     private String username;
     @Value("${spring.datasource.password}")
     private String password;
-
-    private JPanel contentPane;
+    @Value("${files.output-file-name}")
+    private String outputFileName;
+    @Value("${files.input-sql-query}")
+    private String inputSqlQuery;
 
     @Override
-    public void run(String... arg0) throws Exception {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                JPanel databaseAddres = new JPanel();
-                JLabel urlText = new JLabel("Адрес базы: " + url);
-                JLabel userText = new JLabel("Юзер: " + username);
+    public void run(String... arg0) {
+        EventQueue.invokeLater(() -> {
+            JPanel databaseAddres = new JPanel();
+            JLabel urlText = new JLabel("Адрес базы: " + url);
 
-                JDatePickerImpl datePickerBegin = getJDatePickerImpl();
-                JDatePickerImpl datePickerEnd = getJDatePickerImpl();
+            var importButton = new JButton("Импорт");
+            var quitButton = new JButton("Закрыть");
 
+            JDatePickerImpl datePickerBegin = getJDatePickerImpl();
+            JDatePickerImpl datePickerEnd = getJDatePickerImpl();
 
-//                JXDatePicker pickerEnd = new JXDatePicker();
-//                pickerEnd.setDate(Calendar.getInstance().getTime());
-//                pickerEnd.setFormats(new SimpleDateFormat("dd.MM.yyyy"));
-//                pickerEnd.setToolTipText("Дата конца периода");
-//                JTextField passwordText = new JTextField(EMPTY_STRING);
-//                var importButton = new JButton("Импорт");
-//                var quitButton = new JButton("Закрыть");
+            importButton.addActionListener((ActionEvent event) -> importFromDataBase(datePickerBegin, datePickerEnd));
 
-//                importButton.addActionListener((ActionEvent event) -> importFromDataBase());
-//
-//                quitButton.addActionListener((ActionEvent event) -> {
-//                    System.exit(0);
-//                });
+            quitButton.addActionListener((ActionEvent event) -> System.exit(0));
+
+            JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
+            window.setBounds(50, 50, 1000, 150);
+            window.setVisible(true);
+            window.setResizable(false);
+            window.setBackground(Color.GREEN);
 
 
-                JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
-                window.setBounds(50, 50, 600, 480);
-                window.setVisible(true);
+            databaseAddres.add(urlText);
+            window.add(databaseAddres, BorderLayout.LINE_START);
 
+            JPanel panelPeriods = new JPanel();
+            panelPeriods.add(importButton);
+            panelPeriods.add(new JLabel("Выберите периоды: "));
+            panelPeriods.add(datePickerBegin);
+            panelPeriods.add(datePickerEnd);
+            panelPeriods.add(quitButton);
 
-                databaseAddres.add(urlText);
-                window.add(userText, BorderLayout.NORTH);
-                window.add(databaseAddres, BorderLayout.BEFORE_LINE_BEGINS);
-
-                JPanel panel = new JPanel();
-                panel.add(new JLabel("Выберите периоды: "));
-                panel.add(datePickerBegin);
-                panel.add(datePickerEnd);
-                window.add(panel, BorderLayout.AFTER_LAST_LINE);
-
-//                window.add(userText);
-//                window.add(passwordText);
-//                window.add(quitButton);
-//                window.add(importButton);
-            }
+            JPanel panelActions = new JPanel();
+            window.add(panelPeriods, BorderLayout.AFTER_LAST_LINE);
+            window.add(panelActions, BorderLayout.CENTER);
         });
     }
 
@@ -104,38 +103,54 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         JDatePanelImpl datePanel = new JDatePanelImpl(model, properties);
         JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
         datePicker.setBackground(Color.GREEN);
-        datePicker.setBorder(new BevelBorder(1));
+        datePicker.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
         return datePicker;
     }
 
-    public void importFromDataBase() {
+    public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd) {
         try {
-            Workbook wb = new Workbook();
-            Worksheet sheet = wb.getWorksheets().get(0);
-            DataTable dataTable = new DataTable();
+            log.info("Начало извлечения заявлений из ГАСУв файл с программой в каталог output в файл " + outputFileName);
 
-            String query = Files.read(new ClassPathResource("/applicationJdbc.sql")
-                    .getFile(), StandardCharsets.UTF_8);
+            String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
+                    .formatted(BEGIN_SECONDS);
+            String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
+                    .formatted(END_SECONDS);
 
+            InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery);
 
-            Class.forName(driverClassName);
+            String query = getQuery(inputStream).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
+                    PERIOD_FROM_DATE.formatted(selectedDateEnd));
 
-            Connection conn = DriverManager.getConnection(url, username, password);
-            Statement sta = conn.createStatement();
+            buildExelFileFromData(query);
 
-            ResultSet resultSet = sta.executeQuery(query);
-            JdbcAdapter jdbcAdapter = new JdbcAdapter();
-
-            jdbcAdapter.fillDataTable(dataTable, resultSet);
-
-            sheet.insertDataTable(dataTable, true, 1, 1);
-
-            sheet.getAllocatedRange().autoFitColumns();
-
-            wb.saveToFile("src/main/resources/ExportToExcel.xlsx", ExcelVersion.Version2016);
+            log.info("Конец извлечения заявлений из ГАСУв файл с программой в каталог output в файл " + outputFileName);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
+
+    }
+
+    private String getQuery(InputStream inputStream) throws IOException {
+        IOUtils.copy(inputStream, writer, "UTF-8");
+        return writer.toString();
+    }
+
+    private void buildExelFileFromData(String query) throws Exception {
+        Class.forName(driverClassName);
+        Connection conn = DriverManager.getConnection(url, username, password);
+        Statement sta = conn.createStatement();
+        ResultSet resultSet = sta.executeQuery(query);
+        JdbcAdapter jdbcAdapter = new JdbcAdapter();
+        jdbcAdapter.fillDataTable(dataTable, resultSet);
+        sheet.insertDataTable(dataTable, true, 1, 1);
+        sheet.getAllocatedRange().autoFitColumns();
+
+        workbook.saveToFile("output/%s".formatted(outputFileName), ExcelVersion.Version2016);
+    }
+
+    private String convertDateToDateTime(Date date) {
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        return localDate.toString() + " %s";
     }
 }

@@ -6,11 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
+import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.DATE_PATTERN;
 
 public class DateLabelFormatter extends AbstractFormatter {
-
-    private final String datePattern = "dd.MM.yyyy";
-    private final SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+    private final SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_PATTERN);
 
     @Override
     public Object stringToValue(String text) throws ParseException {
