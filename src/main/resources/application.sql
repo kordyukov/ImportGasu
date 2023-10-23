@@ -44,6 +44,11 @@ and la.registration_date between '2023-10-16 00:00:00.000000'
 and '2023-10-16 23:59:59.999999'
 order by la.input_application_number, nsiapp.name, con.full_name
 
+select *
+from profile.contragent
 
-select * from license.application la where la.registration_date between '2023-10-16 00:00:00.000000'
+
+select la.contragent_id
+from license.application la
+where la.registration_date between '2023-10-16 00:00:00.000000'
                                             and '2023-10-16 23:59:59.999999'

@@ -1,20 +1,19 @@
 package ru.fors.itconsulting.importgasu;
-
-import com.spire.data.table.DataTable;
-import com.spire.data.table.common.JdbcAdapter;
-import com.spire.xls.ExcelVersion;
-import com.spire.xls.Workbook;
-import com.spire.xls.Worksheet;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
+import ru.fors.itconsulting.importgasu.service.ImportGasu;
 
-import java.sql.*;
+import java.awt.*;
 
 @SpringBootApplication
 public class ImportGasuApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ImportGasuApplication.class, args);
+        ConfigurableApplicationContext context = new SpringApplicationBuilder(ImportGasuApplication.class).headless(false).run(args);
+        EventQueue.invokeLater(() -> {
+            ImportGasu appFrame = context.getBean(ImportGasu.class);
+            appFrame.setVisible(false);
+        });
     }
 
 }
