@@ -114,6 +114,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd, JLabel status) {
         try(InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
             log.info("Начало извлечения заявлений из ГАСУв файл с программой " + outputFileName);
+            status.setText(START_MESSAGE);
             
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
