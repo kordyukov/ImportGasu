@@ -35,9 +35,4 @@ public class ImportGasuConfig {
     public DataTable dataTable() {
         return new DataTable();
     }
-
-    @Bean
-    public StringWriter stringWriter() {
-        return new StringWriter();
-    }
 }

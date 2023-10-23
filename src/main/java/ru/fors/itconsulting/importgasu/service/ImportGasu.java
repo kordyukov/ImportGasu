@@ -32,6 +32,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Properties;
 
+import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
 
 
@@ -43,7 +44,6 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     private final Workbook workbook;
     private final Worksheet sheet;
     private final DataTable dataTable;
-    private final StringWriter writer;
 
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
@@ -60,17 +60,19 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
 
     @Override
     public void run(String... arg0) {
+       JDatePickerImpl datePickerBegin = getJDatePickerImpl();
+       JDatePickerImpl datePickerEnd = getJDatePickerImpl();
+
         EventQueue.invokeLater(() -> {
             JPanel databaseAddres = new JPanel();
             JLabel urlText = new JLabel("Адрес базы: " + url);
+            JLabel status = new JLabel(START_MESSAGE);
+            status.setBackground(Color.black);
 
             var importButton = new JButton("Импорт");
             var quitButton = new JButton("Закрыть");
 
-            JDatePickerImpl datePickerBegin = getJDatePickerImpl();
-            JDatePickerImpl datePickerEnd = getJDatePickerImpl();
-
-            importButton.addActionListener((ActionEvent event) -> importFromDataBase(datePickerBegin, datePickerEnd));
+            importButton.addActionListener((ActionEvent event) -> importFromDataBase(datePickerBegin, datePickerEnd, status));
 
             quitButton.addActionListener((ActionEvent event) -> System.exit(0));
 
@@ -94,6 +96,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
             JPanel panelActions = new JPanel();
             window.add(panelPeriods, BorderLayout.AFTER_LAST_LINE);
             window.add(panelActions, BorderLayout.CENTER);
+            window.add(status);
         });
     }
 
@@ -108,32 +111,39 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         return datePicker;
     }
 
-    public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd) {
-        try {
-            log.info("Начало извлечения заявлений из ГАСУв файл с программой в каталог output в файл " + outputFileName);
-
+    public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd, JLabel status) {
+        try(InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
+            log.info("Начало извлечения заявлений из ГАСУв файл с программой " + outputFileName);
+            
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
                     .formatted(END_SECONDS);
 
-            InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery);
-
             String query = getQuery(inputStream).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
                     PERIOD_FROM_DATE.formatted(selectedDateEnd));
 
             buildExelFileFromData(query);
+            status.setText(COMPLETE_MESSAGE + outputFileName);
 
-            log.info("Конец извлечения заявлений из ГАСУв файл с программой в каталог output в файл " + outputFileName);
+            log.info("Конец извлечения заявлений из ГАСУв файл с программой в " + outputFileName);
+
         } catch (Exception e) {
+            e.printStackTrace();
             log.error(e.getMessage());
+            status.setText(e.getMessage());
         }
 
     }
 
-    private String getQuery(InputStream inputStream) throws IOException {
-        IOUtils.copy(inputStream, writer, "UTF-8");
-        return writer.toString();
+    private String getQuery(InputStream inputStream) {
+        try(StringWriter writer = new StringWriter()) {
+            IOUtils.copy(inputStream, writer, "UTF-8");
+            return writer.toString();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return EMPTY_STRING;
     }
 
     private void buildExelFileFromData(String query) throws Exception {
@@ -146,7 +156,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         sheet.insertDataTable(dataTable, true, 1, 1);
         sheet.getAllocatedRange().autoFitColumns();
 
-        workbook.saveToFile("output/%s".formatted(outputFileName), ExcelVersion.Version2016);
+        workbook.saveToFile(outputFileName.formatted(outputFileName), ExcelVersion.Version2016);
     }
 
     private String convertDateToDateTime(Date date) {

@@ -9,5 +9,5 @@ logging:
     org.springframework.jdbc.core: TRACE
 
 files:
-  output-file-name: ExportToExcel.xlsx
+  output-file-name: output/ExportToExcel.xlsx
   input-sql-query: applicationJdbc.sql
