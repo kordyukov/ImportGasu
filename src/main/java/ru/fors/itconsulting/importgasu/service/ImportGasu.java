@@ -64,40 +64,51 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         EventQueue.invokeLater(() -> {
             JPanel databaseAddres = new JPanel();
             JLabel urlText = new JLabel("Адрес базы: " + url);
+            databaseAddres.add(urlText);
+
             JLabel status = new JLabel(START_MESSAGE);
             status.setBackground(Color.black);
 
-            var importButton = new JButton("Импорт");
-            var quitButton = new JButton("Закрыть");
-
+            JButton importButton = new JButton("Импорт");
             importButton.addActionListener((ActionEvent event) -> importFromDataBase(datePickerBegin, datePickerEnd, status));
 
+            JButton quitButton = new JButton("Закрыть");
             quitButton.addActionListener((ActionEvent event) -> System.exit(0));
 
-            JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
-            window.setBounds(50, 50, 1000, 150);
-            window.setVisible(true);
-            window.setResizable(false);
-            window.setBackground(Color.GREEN);
+            JPanel panel = initPanel(importButton,
+                    quitButton, datePickerBegin, datePickerEnd);
 
+            JFrame window = initWindow();
 
-            databaseAddres.add(urlText);
             window.add(databaseAddres, BorderLayout.LINE_START);
-
-            JPanel panelPeriods = new JPanel();
-            panelPeriods.add(importButton);
-            panelPeriods.add(new JLabel("Выберите периоды: "));
-            panelPeriods.add(datePickerBegin);
-            panelPeriods.add(datePickerEnd);
-            panelPeriods.add(quitButton);
-
-            JPanel panelActions = new JPanel();
-            window.add(panelPeriods, BorderLayout.AFTER_LAST_LINE);
-            window.add(panelActions, BorderLayout.CENTER);
+            window.add(panel, BorderLayout.AFTER_LAST_LINE);
             window.add(status);
             window.add(new JLabel("Чтобы изменить конфигурацию, отредактируйте файл " +
                     "<Имя_приложения>.jar->BOOT-INF->classes->application.yaml"), BorderLayout.BEFORE_FIRST_LINE);
         });
+    }
+
+    private JPanel initPanel(JButton importButton,
+                             JButton quitButton,
+                             JDatePickerImpl datePickerBegin,
+                             JDatePickerImpl datePickerEnd) {
+        JPanel panel = new JPanel();
+        panel.add(importButton);
+        panel.add(new JLabel("Выберите периоды: "));
+        panel.add(datePickerBegin);
+        panel.add(datePickerEnd);
+        panel.add(quitButton);
+
+        return panel;
+    }
+
+    private JFrame initWindow() {
+        JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
+        window.setBounds(50, 50, 1000, 150);
+        window.setVisible(true);
+        window.setResizable(false);
+        window.setBackground(Color.GREEN);
+        return window;
     }
 
     private JDatePickerImpl getJDatePickerImpl() {
