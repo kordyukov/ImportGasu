@@ -24,7 +24,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -39,9 +42,6 @@ import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
 @RequiredArgsConstructor
 public class ImportGasu extends JFrame implements CommandLineRunner {
     private final Properties properties;
-    private final Workbook workbook;
-    private final Worksheet sheet;
-    private final DataTable dataTable;
 
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
@@ -95,6 +95,8 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
             window.add(panelPeriods, BorderLayout.AFTER_LAST_LINE);
             window.add(panelActions, BorderLayout.CENTER);
             window.add(status);
+            window.add(new JLabel("Чтобы изменить конфигурацию, отредактируйте файл " +
+                    "<Имя_приложения>.jar->BOOT-INF->classes->application.yaml"), BorderLayout.BEFORE_FIRST_LINE);
         });
     }
 
@@ -111,7 +113,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
 
     public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd, JLabel status) {
         try (InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
-            log.info("Начало извлечения заявлений из ГАСУв файл с программой " + outputFileName);
+            log.info(START_MESSAGE);
 
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
@@ -123,10 +125,9 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
 
             buildExelFileFromData(query);
             JOptionPane.showMessageDialog(null, COMPLETE_MESSAGE + outputFileName);
-            log.info("Конец извлечения заявлений из ГАСУв файл с программой в " + outputFileName);
+            log.info(COMPLETE_MESSAGE);
             openFile();
         } catch (Exception e) {
-            e.printStackTrace();
             log.error(e.getMessage());
             status.setText(e.getMessage());
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -146,17 +147,26 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     }
 
     private void buildExelFileFromData(String query) throws Exception {
-        deleteFile();
-        Class.forName(driverClassName);
-        Connection conn = DriverManager.getConnection(url, username, password);
-        Statement sta = conn.createStatement();
-        ResultSet resultSet = sta.executeQuery(query);
-        JdbcAdapter jdbcAdapter = new JdbcAdapter();
-        jdbcAdapter.fillDataTable(dataTable, resultSet);
-        sheet.insertDataTable(dataTable, true, 1, 1);
-        sheet.getAllocatedRange().autoFitColumns();
+        try (Connection conn = DriverManager.getConnection(url, username, password);
+             Statement sta = conn.createStatement();
+             ResultSet resultSet = sta.executeQuery(query)) {
+            deleteFile();
+            Class.forName(driverClassName);
 
-        workbook.saveToFile(outputFileName, ExcelVersion.Version2016);
+            DataTable dataTable = new DataTable();
+
+            JdbcAdapter jdbcAdapter = new JdbcAdapter();
+            jdbcAdapter.fillDataTable(dataTable, resultSet);
+
+            Workbook workbook = new Workbook();
+            Worksheet sheet = workbook.getWorksheets().get(0);
+
+            sheet.insertDataTable(dataTable, true, 1, 1);
+            sheet.getAllocatedRange().autoFitColumns();
+
+            workbook.saveToFile(outputFileName, ExcelVersion.Version2016);
+        }
+
     }
 
     private String convertDateToDateTime(Date date) {
@@ -173,9 +183,6 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         }
 
         Desktop desktop = Desktop.getDesktop();
-        if (file.exists()) desktop.open(file);
-
-        file = new File("/Users/pankaj/java.pdf");
         if (file.exists()) desktop.open(file);
     }
 
