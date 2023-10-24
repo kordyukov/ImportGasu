@@ -24,10 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -149,6 +146,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     }
 
     private void buildExelFileFromData(String query) throws Exception {
+        deleteFile();
         Class.forName(driverClassName);
         Connection conn = DriverManager.getConnection(url, username, password);
         Statement sta = conn.createStatement();
@@ -158,7 +156,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         sheet.insertDataTable(dataTable, true, 1, 1);
         sheet.getAllocatedRange().autoFitColumns();
 
-        workbook.saveToFile(outputFileName.formatted(outputFileName), ExcelVersion.Version2016);
+        workbook.saveToFile(outputFileName, ExcelVersion.Version2016);
     }
 
     private String convertDateToDateTime(Date date) {
@@ -167,7 +165,7 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     }
 
     private void openFile() throws IOException {
-        File file = new File("/%s".formatted(outputFileName));
+        File file = new File(outputFileName);
 
         if (!Desktop.isDesktopSupported()) {
             log.error("Desktop is not supported");
@@ -181,15 +179,12 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
         if (file.exists()) desktop.open(file);
     }
 
-    private Workbook workbook() {
-        return new Workbook();
-    }
+    private void deleteFile() {
+        File fileToDelete = new File(outputFileName);
+        boolean success = fileToDelete.delete();
 
-    private Worksheet worksheet() {
-        return workbook().getWorksheets().get(0);
-    }
-
-    private DataTable dataTable() {
-        return new DataTable();
+        if (!success) {
+            JOptionPane.showMessageDialog(null, "Закройте отчет для загрузки нового!");
+        }
     }
 }
