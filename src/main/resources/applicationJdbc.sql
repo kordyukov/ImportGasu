@@ -1,12 +1,13 @@
-select distinct on(la.input_application_number) la.input_application_number AS "Уникальный номер заявления",
-                                                nsiapp.name AS "Вид заявления",
+select distinct
+on(la.input_application_number) la.input_application_number AS "Уникальный номер заявления",
+    nsiapp.name AS "Вид заявления",
     nsiact.erul_code AS "Идентификатор разрешительного режима",
-                                                nsiact.name AS "Разрешительный режим",
-                                                nsiwork.erul_code AS "Идентификатор разрешительного вида деятельности",
-                                                nsiwork.erul_name AS "Разрешительный вид деятельности",
-                                                la.registration_date AS "Дата подачи заявления",
+    nsiact.name AS "Разрешительный режим",
+    nsiwork.erul_code AS "Идентификатор разрешительного вида деятельности",
+    nsiwork.erul_name AS "Разрешительный вид деятельности",
+    la.registration_date AS "Дата подачи заявления",
     con.rtn_org_code AS "Идентификатор разрешительного органа",
-                                                con.full_name AS "Разрешительный орган",
+    con.full_name AS "Разрешительный орган",
     (SELECT CASE WHEN sub.code is null THEN la.rf_subject_id:: varchar ELSE sub.code END) AS "Код субъекта РФ",
     (SELECT CASE WHEN sub.name is null THEN
     (
@@ -14,18 +15,18 @@ select distinct on(la.input_application_number) la.input_application_number AS "
     )
     ELSE sub.name END
     ) AS "Субъект РФ",
-                                                appsubmit.name AS "Способ направления",
-                                                contype.name AS "Тип заявителя",
+    appsubmit.name AS "Способ направления",
+    contype.name AS "Тип заявителя",
     (select case when applicant.full_name is null then applicant.short_name else applicant.full_name end ) AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
-                                                applicant.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
-                                                applicant.inn AS "ИНН заявителя",
-                                                (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
-                                                rej.name  AS "Причина отказа",
-                                                la.object_edit_date AS "Дата принятия решения",
-                                                la.application_number AS "Регистрационный номер разрешения",
-                                                la.object_edit_date AS "Дата предоставления разрешения",
-                                                la.version_end_date AS "Дата прекращения действия разрешения (при наличии)",
-                                                b4status.name AS "Статус разрешения"
+    applicant.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
+    applicant.inn AS "ИНН заявителя",
+    (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
+    rej.name AS "Причина отказа",
+    la.object_edit_date AS "Дата принятия решения",
+    la.application_number AS "Регистрационный номер разрешения",
+    la.object_edit_date AS "Дата предоставления разрешения",
+    la.version_end_date AS "Дата прекращения действия разрешения (при наличии)",
+    b4status.name AS "Статус разрешения"
 from license.application la
     left join nsi.nsi_application_type nsiapp
 on la.application_type_id = nsiapp.id

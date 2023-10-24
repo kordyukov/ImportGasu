@@ -20,6 +20,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -60,8 +61,8 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
 
     @Override
     public void run(String... arg0) {
-       JDatePickerImpl datePickerBegin = getJDatePickerImpl();
-       JDatePickerImpl datePickerEnd = getJDatePickerImpl();
+        JDatePickerImpl datePickerBegin = getJDatePickerImpl();
+        JDatePickerImpl datePickerEnd = getJDatePickerImpl();
 
         EventQueue.invokeLater(() -> {
             JPanel databaseAddres = new JPanel();
@@ -112,10 +113,9 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     }
 
     public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd, JLabel status) {
-        try(InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
+        try (InputStream inputStream = ImportGasu.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
             log.info("Начало извлечения заявлений из ГАСУв файл с программой " + outputFileName);
-            status.setText(START_MESSAGE);
-            
+
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
@@ -125,20 +125,21 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
                     PERIOD_FROM_DATE.formatted(selectedDateEnd));
 
             buildExelFileFromData(query);
-            status.setText(COMPLETE_MESSAGE + outputFileName);
-
+            JOptionPane.showMessageDialog(null, COMPLETE_MESSAGE + outputFileName);
             log.info("Конец извлечения заявлений из ГАСУв файл с программой в " + outputFileName);
-
+            openFile();
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());
             status.setText(e.getMessage());
+            JOptionPane.showMessageDialog(null, e.getMessage());
+
         }
 
     }
 
     private String getQuery(InputStream inputStream) {
-        try(StringWriter writer = new StringWriter()) {
+        try (StringWriter writer = new StringWriter()) {
             IOUtils.copy(inputStream, writer, "UTF-8");
             return writer.toString();
         } catch (Exception e) {
@@ -163,5 +164,32 @@ public class ImportGasu extends JFrame implements CommandLineRunner {
     private String convertDateToDateTime(Date date) {
         LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         return localDate.toString() + " %s";
+    }
+
+    private void openFile() throws IOException {
+        File file = new File("/%s".formatted(outputFileName));
+
+        if (!Desktop.isDesktopSupported()) {
+            log.error("Desktop is not supported");
+            return;
+        }
+
+        Desktop desktop = Desktop.getDesktop();
+        if (file.exists()) desktop.open(file);
+
+        file = new File("/Users/pankaj/java.pdf");
+        if (file.exists()) desktop.open(file);
+    }
+
+    private Workbook workbook() {
+        return new Workbook();
+    }
+
+    private Worksheet worksheet() {
+        return workbook().getWorksheets().get(0);
+    }
+
+    private DataTable dataTable() {
+        return new DataTable();
     }
 }

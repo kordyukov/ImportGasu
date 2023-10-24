@@ -1,6 +1,8 @@
-WITH sum AS (select distinct on(la.input_application_number) la.input_application_number
+WITH sum AS (select distinct
+on(la.input_application_number) la.input_application_number
 from license.application la
-    left join nsi.nsi_application_type nsiapp on la.application_type_id = nsiapp.id
+    left join nsi.nsi_application_type nsiapp
+on la.application_type_id = nsiapp.id
     left join profile.contragent con on la.territory_organ_id = con.id
     left join nsi.nsi_rf_subjects_codes sub on la.rf_subject_id = sub.id
     left join nsi.nsi_activity_kind nsiact on nsiact.id = la.activity_kind_id
@@ -14,4 +16,5 @@ from license.application la
     left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
     )
 
-select count(sum.input_application_number) from sum;
+select count(sum.input_application_number)
+from sum;
