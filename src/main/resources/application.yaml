@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://10.19.218.137:5432/prod_rtn_copy
-    username: postgres
-    password:
+    url: ${URL}
+    username: ${USERNAME}
+    password: ${PASSWORD}
 logging:
   level:
     org.springframework.jdbc.core: TRACE
