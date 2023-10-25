@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.fors.itconsulting.importgasu.config.DateLabelFormatter;
 import ru.fors.itconsulting.importgasu.service.ImportGasuImpl;
 
-import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.util.Date;
@@ -22,7 +21,7 @@ public class ImportGasuTest {
     private final Properties properties = getProperties();
     private final JDatePickerImpl datePickerBegin = getJDatePickerImpl();
     private final JDatePickerImpl datePickerEnd = getJDatePickerImpl();
-    private final JLabel status = new JLabel();
+
     @Autowired
     private ImportGasuImpl importGasu;
 
@@ -34,7 +33,7 @@ public class ImportGasuTest {
 
     @Test
     public void shouldImportFromDataBase() {
-        importGasu.importFromDataBase(datePickerBegin, datePickerEnd, status);
+        importGasu.importFromDataBase(datePickerBegin, datePickerEnd);
     }
 
     private Properties getProperties() {

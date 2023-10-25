@@ -8,6 +8,7 @@ import com.spire.xls.Worksheet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
@@ -66,11 +67,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             JLabel urlText = new JLabel("Адрес базы: " + url);
             databaseAddres.add(urlText);
 
-            JLabel status = new JLabel(START_MESSAGE);
-            status.setBackground(Color.black);
-
-            JButton importButton = new JButton("Импорт");
-            importButton.addActionListener((ActionEvent event) -> importFromDataBase(datePickerBegin, datePickerEnd, status));
+            JButton importButton = new JButton("Выгрузить");
+            importButton.addActionListener((ActionEvent event) -> importFromDataBase(datePickerBegin, datePickerEnd));
 
             JButton quitButton = new JButton("Закрыть");
             quitButton.addActionListener((ActionEvent event) -> System.exit(0));
@@ -82,9 +80,6 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             window.add(databaseAddres, BorderLayout.LINE_START);
             window.add(panel, BorderLayout.AFTER_LAST_LINE);
-            window.add(status);
-            window.add(new JLabel("Чтобы изменить конфигурацию, отредактируйте файл " +
-                    "<Имя_приложения>.jar->BOOT-INF->classes->application.yaml"), BorderLayout.BEFORE_FIRST_LINE);
         });
     }
 
@@ -104,7 +99,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private JFrame initWindow() {
         JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
-        window.setBounds(50, 50, 1000, 150);
+        window.setBounds(50, 50, 1000, 100);
         window.setVisible(true);
         window.setResizable(false);
         window.setBackground(Color.GREEN);
@@ -113,7 +108,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private JDatePickerImpl getJDatePickerImpl() {
         UtilDateModel model = new UtilDateModel();
-        model.setValue(new Date());
+        model.setValue(DateUtils.addDays(new Date(),-1));
         JDatePanelImpl datePanel = new JDatePanelImpl(model, properties);
         JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
         datePicker.setBackground(Color.GREEN);
@@ -123,10 +118,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     @Override
-    public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd, JLabel status) {
+    public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd) {
         try (InputStream inputStream = ImportGasuImpl.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
-            log.info(START_MESSAGE);
-
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
@@ -141,7 +134,6 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             openFile();
         } catch (Exception e) {
             log.error(e.getMessage());
-            status.setText(e.getMessage());
             JOptionPane.showMessageDialog(null, e.getMessage());
 
         }
@@ -162,7 +154,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         try (Connection conn = DriverManager.getConnection(url, username, password);
              Statement sta = conn.createStatement();
              ResultSet resultSet = sta.executeQuery(query)) {
-            deleteFile();
+            checkAnddeleteFile();
             Class.forName(driverClassName);
 
             DataTable dataTable = new DataTable();
@@ -190,7 +182,9 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         File file = new File(outputFileName);
 
         if (!Desktop.isDesktopSupported()) {
-            log.error("Desktop is not supported");
+            log.error(DESKTOP_IS_NO_SUPPORTED);
+            JOptionPane.showMessageDialog(null, DESKTOP_IS_NO_SUPPORTED);
+
             return;
         }
 
@@ -198,12 +192,14 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         if (file.exists()) desktop.open(file);
     }
 
-    private void deleteFile() {
+    private void checkAnddeleteFile() {
         File fileToDelete = new File(outputFileName);
-        boolean success = fileToDelete.delete();
+        if (fileToDelete.exists()) {
+            boolean success = fileToDelete.delete();
 
-        if (!success) {
-            JOptionPane.showMessageDialog(null, "Закройте отчет для загрузки нового!");
+            if (!success) {
+                JOptionPane.showMessageDialog(null, "Закройте отчет для загрузки нового!");
+            }
         }
     }
 }
