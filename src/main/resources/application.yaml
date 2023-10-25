@@ -4,6 +4,7 @@ spring:
     url: ${URL}
     username: ${USERNAME}
     password: ${PASSWORD}
+
 logging:
   level:
     org.springframework.jdbc.core: TRACE
