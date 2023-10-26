@@ -17,9 +17,9 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     ) AS "Субъект РФ",
     appsubmit.name AS "Способ направления",
     contype.name AS "Тип заявителя",
-    (select case when applicant.full_name is null then applicant.short_name else applicant.full_name end ) AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
-    applicant.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
-    applicant.inn AS "ИНН заявителя",
+    conapp.full_name  AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
+    conapp.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
+    conapp.inn AS "ИНН заявителя",
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
     la.object_edit_date AS "Дата принятия решения",
@@ -35,8 +35,9 @@ on la.application_type_id = nsiapp.id
     left join nsi.nsi_activity_kind nsiact on nsiact.id = la.activity_kind_id
     left join nsi.nsi_work_type nsiwork on nsiwork.activity_kind_id = nsiact.id
     left join nsi.nsi_application_submit_method appsubmit on la.delivery_method_id = appsubmit.id
-    left join profile.contragent applicant on applicant.id = la.contragent_id
-    left join nsi.nsi_contragent_type contype on applicant.contragent_type_id = contype.id
+    left join license.applicant lapp on la.id = lapp.application_id
+    left join profile.contragent conapp on conapp.id = lapp.contragent_id
+    left join nsi.nsi_contragent_type contype on conapp.contragent_type_id = contype.id
     left join public.b4_state b4status on la.state_id = b4status.id
     left join license.decision dec on la.id = dec.application_id
     left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
