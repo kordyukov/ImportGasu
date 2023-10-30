@@ -5,10 +5,6 @@ spring:
     username: ${USERNAME}
     password: ${PASSWORD}
 
-logging:
-  level:
-    org.springframework.jdbc.core: TRACE
-
 files:
   output-file-name: output/ExportToExcel.xlsx
   input-sql-query: applicationJdbc.sql

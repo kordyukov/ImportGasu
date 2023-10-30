@@ -5,13 +5,13 @@ import com.spire.data.table.common.JdbcAdapter;
 import com.spire.xls.ExcelVersion;
 import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -38,10 +38,9 @@ import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
 
 
-@Slf4j
 @Component
-@RequiredArgsConstructor
 public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportGasu {
+    private static final Logger log = LoggerFactory.getLogger(ImportGasuImpl.class);
     private final Properties properties;
 
     @Value("${spring.datasource.driver-class-name}")
@@ -57,12 +56,18 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     @Value("${files.input-sql-query}")
     private String inputSqlQuery;
 
+    public ImportGasuImpl(Properties properties) {
+        this.properties = properties;
+    }
+
     @Override
     public void run(String... arg0) {
         JDatePickerImpl datePickerBegin = getJDatePickerImpl();
         JDatePickerImpl datePickerEnd = getJDatePickerImpl();
 
         EventQueue.invokeLater(() -> {
+            log.info("Старт загрузки приложения по выгрузке данных с {}", url);
+
             JPanel databaseAddres = new JPanel();
             JLabel urlText = new JLabel("Адрес базы: " + url);
             databaseAddres.add(urlText);
@@ -80,6 +85,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             window.add(databaseAddres, BorderLayout.LINE_START);
             window.add(panel, BorderLayout.AFTER_LAST_LINE);
+
+            log.info("Конец загрузки приложения по выгрузке данных с {}", url);
         });
     }
 
@@ -120,6 +127,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     @Override
     public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd) {
         try (InputStream inputStream = ImportGasuImpl.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
+            log.info(START_MESSAGE.formatted(url));
+
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
@@ -130,8 +139,10 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             buildExelFileFromData(query);
             JOptionPane.showMessageDialog(null, COMPLETE_MESSAGE + outputFileName);
-            log.info(COMPLETE_MESSAGE);
+
             openFile();
+
+            log.info(COMPLETE_MESSAGE + outputFileName);
         } catch (Exception e) {
             log.error(e.getMessage());
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -198,8 +209,11 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             boolean success = fileToDelete.delete();
 
             if (!success) {
+                log.info("Закройте отчет для загрузки нового!");
                 JOptionPane.showMessageDialog(null, "Закройте отчет для загрузки нового!");
             }
+        } else {
+            log.info("Отчет отсутствуев в {}, загружаем...", outputFileName);
         }
     }
 }
