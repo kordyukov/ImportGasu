@@ -127,8 +127,6 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     @Override
     public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd) {
         try (InputStream inputStream = ImportGasuImpl.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
-            log.info(START_MESSAGE.formatted(url));
-
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
@@ -136,6 +134,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             String query = getQuery(inputStream).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
                     PERIOD_FROM_DATE.formatted(selectedDateEnd));
+
+            log.info(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd));
 
             buildExelFileFromData(query);
             JOptionPane.showMessageDialog(null, COMPLETE_MESSAGE + outputFileName);
@@ -165,7 +165,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         try (Connection conn = DriverManager.getConnection(url, username, password);
              Statement sta = conn.createStatement();
              ResultSet resultSet = sta.executeQuery(query)) {
-            checkAnddeleteFile();
+            checkAndDeleteFile();
             Class.forName(driverClassName);
 
             DataTable dataTable = new DataTable();
@@ -203,7 +203,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         if (file.exists()) desktop.open(file);
     }
 
-    private void checkAnddeleteFile() {
+    private void checkAndDeleteFile() {
         File fileToDelete = new File(outputFileName);
         if (fileToDelete.exists()) {
             boolean success = fileToDelete.delete();
