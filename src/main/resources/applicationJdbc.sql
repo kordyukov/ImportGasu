@@ -22,11 +22,16 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     lapp.inn AS "ИНН заявителя",
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
-    la.object_edit_date AS "Дата принятия решения",
-    la.application_number AS "Регистрационный номер разрешения",
-    la.object_edit_date AS "Дата предоставления разрешения",
-    la.version_end_date AS "Дата прекращения действия разрешения (при наличии)",
-    b4status.name AS "Статус разрешения"
+    dec.object_create_date AS "Дата принятия решения",
+    dec.decision_number AS "Регистрационный номер разрешения",
+    (
+        select case when dec.decision_date is not null then
+        concat(SUBSTRING(dec.decision_date::varchar,9,2), '.',
+        SUBSTRING(dec.decision_date::varchar,6,2), '.',
+        SUBSTRING(dec.decision_date::varchar,1,4)) else '' end
+    ) AS "Дата предоставления разрешения",
+    dec.version_end_date AS "Дата прекращения действия разрешения (при наличии)",
+    (select st.name from public.b4_state st where dec.status_id = st.id) AS "Статус разрешения"
 from license.application la
     left join nsi.nsi_application_type nsiapp
 on la.application_type_id = nsiapp.id
