@@ -16,8 +16,10 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     ELSE sub.name END
     ) AS "Субъект РФ",
     appsubmit.name AS "Способ направления",
-    contype.name AS "Тип заявителя",
-    lapp.full_name  AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
+    (select case when contype.name is not null then contype.name
+     else (select nat.name from nsi.nsi_applicant_type nat where lapp.applicant_type_id = nat.id) end ) AS "Тип заявителя",
+    (select case when lapp.full_name is not null then lapp.full_name
+     else concat(lapp.fam, ' ', lapp.name, ' ', lapp.fname) end)  AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
     lapp.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
     lapp.inn AS "ИНН заявителя",
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
