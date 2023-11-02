@@ -15,7 +15,7 @@ select appatom.incoming_number AS "Уникальный номер заявле�
     lappatom.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
     lappatom.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
     lappatom.inn AS "ИНН заявителя",
-    (select decisionatom.name from public.b4_state decisionatom where lappatom.state_id = decisionatom.id) AS "Решение",
+    (select decisionatom.name from public.b4_state decisionatom where decatom.state_id = decisionatom.id) AS "Решение",
     '' AS "Причина отказа",
     decatom.object_create_date AS "Дата принятия решения",
     decatom.decision_number AS "Регистрационный номер разрешения",
