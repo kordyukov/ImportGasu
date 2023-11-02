@@ -1,5 +1,5 @@
 (
-select distinct on(appatom.incoming_number) appatom.incoming_number AS "Уникальный номер заявления",
+select appatom.incoming_number AS "Уникальный номер заявления",
     nsiappatom.name AS "Вид заявления",
     nsiactatom.code AS "Идентификатор разрешительного режима",
     nsiactatom.name AS "Разрешительный режим",
