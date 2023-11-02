@@ -7,4 +7,5 @@ spring:
 
 files:
   output-file-name: output/ExportToExcel.xlsx
-  input-sql-query: applicationJdbc.sql
+  input-sql-query-application: application.sql
+  input-sql-query-atomic-application: applicationAtomic.sql
