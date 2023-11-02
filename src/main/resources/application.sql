@@ -1,3 +1,4 @@
+(
 select distinct
 on(la.input_application_number) la.input_application_number AS "Уникальный номер заявления",
     nsiapp.name AS "Вид заявления",
@@ -52,3 +53,4 @@ where la.object_deleted = false
   and la.registration_date between %s
   and %s
 order by la.input_application_number, nsiapp.name, con.full_name
+)

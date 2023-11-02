@@ -53,8 +53,10 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     private String password;
     @Value("${files.output-file-name}")
     private String outputFileName;
-    @Value("${files.input-sql-query}")
-    private String inputSqlQuery;
+    @Value("${files.input-sql-query-application}")
+    private String inputSqlQueryFromApplication;
+    @Value("${files.input-sql-query-atomic-application}")
+    private String inputSqlQueryFromAtomicApplication;
 
     public ImportGasuImpl(Properties properties) {
         this.properties = properties;
@@ -126,13 +128,17 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     @Override
     public void importFromDataBase(JDatePickerImpl datePickerBegin, JDatePickerImpl datePickerEnd) {
-        try (InputStream inputStream = ImportGasuImpl.class.getClassLoader().getResourceAsStream(inputSqlQuery)) {
+        try (InputStream inputStreamFromApplication = ImportGasuImpl.class.getClassLoader().getResourceAsStream(inputSqlQueryFromApplication);
+             InputStream inputStreamFromAtomicApplication = ImportGasuImpl.class.getClassLoader().getResourceAsStream(inputSqlQueryFromAtomicApplication)) {
             String selectedDateBegin = convertDateToDateTime((Date) datePickerBegin.getModel().getValue())
                     .formatted(BEGIN_SECONDS);
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
                     .formatted(END_SECONDS);
 
-            String query = getQuery(inputStream).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
+            String query = getQuery(inputStreamFromApplication).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
+                    PERIOD_FROM_DATE.formatted(selectedDateEnd)) +
+                    UNION_CONSTANT +
+                    getQuery(inputStreamFromAtomicApplication).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
                     PERIOD_FROM_DATE.formatted(selectedDateEnd));
 
             log.info(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd));
