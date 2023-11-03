@@ -26,7 +26,7 @@ select appatom.incoming_number AS "Уникальный номер заявле�
      SUBSTRING(DATE(decatom.approval_date)::varchar,1,4)) else '' end
      ) AS "Дата предоставления разрешения",
     decatom.deadline AS "Дата прекращения действия разрешения (при наличии)",
-    (select decisionatom.name from public.b4_state decisionatom where decatom.state_id = decisionatom.id) AS "Статус разрешения"
+    (select appst.name from public.b4_state appst where appatom.state_id = appst.id) AS "Статус разрешения"
 from license_atomic.application_atomic appatom
     left join nsi.nsi_gonernment_services_and_goals nsiappatom on appatom.government_service_id = nsiappatom.id
     left join profile.contragent conatom on appatom.authority_registered_application_id = conatom.id
