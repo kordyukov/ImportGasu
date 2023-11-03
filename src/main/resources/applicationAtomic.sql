@@ -9,7 +9,8 @@ select appatom.incoming_number AS "Уникальный номер заявле�
     conatom.rtn_org_code AS "Идентификатор разрешительного органа",
     conatom.full_name AS "Разрешительный орган",
     rfsubjcode.code AS "Код субъекта РФ",
-    rfsubjcode.name AS "Субъект РФ",
+    (select case when rfsubjcode.name is not null then rfsubjcode.name
+     else addrcentr.region_name end) AS "Субъект РФ",
     appsubmitatom.name AS "Способ направления",
     contypeatom.name AS "Тип заявителя",
     lappatom.full_name AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
