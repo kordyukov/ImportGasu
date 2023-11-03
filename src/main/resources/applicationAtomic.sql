@@ -1,10 +1,10 @@
 (
 select appatom.incoming_number AS "Уникальный номер заявления",
     nsiappatom.name AS "Вид заявления",
-    nsiactatom.code AS "Идентификатор разрешительного режима",
-    nsiactatom.name AS "Разрешительный режим",
-    nsiworkatom.erul_code AS "Идентификатор разрешительного вида деятельности",
-    nsiworkatom.erul_name  AS "Разрешительный вид деятельности",
+    acao.code AS "Идентификатор разрешительного режима",
+    acao.name AS "Разрешительный режим",
+    nsiactatom.code AS "Идентификатор разрешительного вида деятельности",
+    nsiactatom.nameAS "Разрешительный вид деятельности",
     appatom.registration_date AS "Дата подачи заявления",
     conatom.rtn_org_code AS "Идентификатор разрешительного органа",
     conatom.full_name AS "Разрешительный орган",
@@ -16,7 +16,9 @@ select appatom.incoming_number AS "Уникальный номер заявле�
     lappatom.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
     lappatom.inn AS "ИНН заявителя",
     (select decisionatom.name from public.b4_state decisionatom where decatom.state_id = decisionatom.id) AS "Решение",
-    '' AS "Причина отказа",
+    (select refreasatom.name from nsi.nsi_government_service_refusal_reasons refreasatom
+                             where nsiappatom.parent_id = refreasatom.government_service_and_goal_id limit 1
+    ) AS "Причина отказа",
     decatom.object_create_date AS "Дата принятия решения",
     decatom.decision_number AS "Регистрационный номер разрешения",
     (
