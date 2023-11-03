@@ -1,8 +1,8 @@
 (
 select appatom.incoming_number AS "Уникальный номер заявления",
     nsiappatom.name AS "Вид заявления",
-    acao.code AS "Идентификатор разрешительного режима",
-    acao.name AS "Разрешительный режим",
+    nsiworkatom.erul_code AS "Идентификатор разрешительного режима",
+    nsiworkatom.erul_name AS "Разрешительный режим",
     nsiactatom.code AS "Идентификатор разрешительного вида деятельности",
     nsiactatom.nameAS "Разрешительный вид деятельности",
     appatom.registration_date AS "Дата подачи заявления",
