@@ -44,7 +44,7 @@ from license_atomic.application_atomic appatom
     left join nsi.nsi_contragent_type contypeatom on appatomcon.contragent_type_id = contypeatom.id
     left join public.b4_state b4status on appatom.state_id = b4status.id
     left join license_atomic.decision_atomic decatom on appatom.id = decatom.application_atomic_id
-where appatom.is_deleted = false and lappatom.full_name is not null
+where appatom.is_deleted = false
   and appatom.registration_date  between %s
     and %s
 order by appatom.incoming_number, nsiappatom.name, conatom.full_name
