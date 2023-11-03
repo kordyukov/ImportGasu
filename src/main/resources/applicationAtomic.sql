@@ -1,8 +1,8 @@
 (
 select appatom.incoming_number AS "Уникальный номер заявления",
     nsiappatom.name AS "Вид заявления",
-    nsiworkatom.erul_code AS "Идентификатор разрешительного режима",
-    nsiworkatom.erul_name AS "Разрешительный режим",
+    (select nds.code from nsi.nsi_direction_supervision nds where sdak.supervision_direction_id = nds.id) AS "Идентификатор разрешительного режима",
+    (select ndsd.description from nsi.nsi_direction_supervision ndsd where sdak.supervision_direction_id = ndsd.id) AS "Разрешительный режим",
     nsiactatom.code AS "Идентификатор разрешительного вида деятельности",
     nsiactatom.name AS "Разрешительный вид деятельности",
     appatom.registration_date AS "Дата подачи заявления",
