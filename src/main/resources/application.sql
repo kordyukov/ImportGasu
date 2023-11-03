@@ -41,7 +41,7 @@ on la.application_type_id = nsiapp.id
     left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
     left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
     left join license.license license on dec.id = license.decision_id
-where la.object_deleted = false limit 100
+where la.object_deleted = false
   and la.registration_date between %s
   and %s
 order by la.input_application_number, nsiapp.name, con.full_name
