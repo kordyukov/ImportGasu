@@ -22,9 +22,10 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
      else concat(lapp.fam, ' ', lapp.name, ' ', lapp.fname) end)  AS "Наименование заявителя (для ЮЛ), ФИО для ФЛ и ИП",
     lapp.ogrn AS "ОГРН (ОГРНИП) заявителя (для ЮЛ и ИП)",
     lapp.inn AS "ИНН заявителя",
-    (select case when (select isp.id from license.field_inspection isp where dec.id = isp.decision_id limit 1) is not null
+    (select case when isp.id is not null
      then 'Выездная' else 'Дистанционная' end ) AS "Способ проверки",
-    '' AS "Дата проведения проверки",
+    (select case when isp.id is not null then isp.object_create_date
+     else ara.object_create_date end) AS "Дата проведения проверки",
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
     dec.object_create_date AS "Дата принятия решения",
@@ -41,7 +42,9 @@ on la.application_type_id = nsiapp.id
     left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
     left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
     left join license.license license on dec.id = license.decision_id
-where la.object_deleted = false
+    left join license.field_inspection isp on dec.id = isp.decision_id
+    left join license.application_review_acceptance ara on la.id = ara.application_id
+where la.object_deleted = false limit 100
   and la.registration_date between %s
   and %s
 order by la.input_application_number, nsiapp.name, con.full_name
