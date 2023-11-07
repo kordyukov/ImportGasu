@@ -4,8 +4,8 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     nsiact.erul_code AS "Идентификатор лицензируемого вида деятельности",
     nsiact.name AS "Наименование лицензируемого вида деятельности",
     la.registration_date AS "Дата подачи заявления",
-    '' AS "Дата уведомления заявителя о необходимости устранения",
-    '' AS "Дата принятия решения лицензирующим органом о рассмотрении",
+    refreas.object_create_date  AS "Дата уведомления заявителя о необходимости устранения",
+    dec.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
     con.exploit_number AS "Идентификатор разрешительного органа",
     con.full_name AS "Наименование лицензирующего органа",
     (SELECT CASE WHEN sub.code is null THEN la.rf_subject_id:: varchar ELSE sub.code END) AS "Код субъекта РФ",
@@ -44,7 +44,7 @@ on la.application_type_id = nsiapp.id
     left join license.license license on dec.id = license.decision_id
     left join license.field_inspection isp on dec.id = isp.decision_id
     left join license.application_review_acceptance ara on la.id = ara.application_id
-where la.object_deleted = false limit 100
+where la.object_deleted = false
   and la.registration_date between %s
   and %s
 order by la.input_application_number, nsiapp.name, con.full_name
