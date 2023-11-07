@@ -31,8 +31,11 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
@@ -178,10 +181,41 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             sheet.insertDataTable(dataTable, true, 1, 1);
             sheet.getAllocatedRange().autoFitColumns();
+            sheet.setName("Данные о заявлениях, решения.");
+
+            buildGuideFromParameters(sheet, workbook);
+
+            workbook.getWorksheets().get(2).remove();
 
             workbook.saveToFile(outputFileName, ExcelVersion.Version2016);
         }
 
+    }
+
+    private void buildGuideFromParameters(Worksheet sheet, Workbook workbook) {
+        int length = sheet.getRows().length;
+        ArrayList<String> resultFromGuideList = buildListParametersFromGuide(1, 13, length, 2, sheet);
+        resultFromGuideList.addAll(buildListParametersFromGuide(2, 2, length, 1, sheet));
+        resultFromGuideList.addAll(buildListParametersFromGuide(2, 12, length, 2, sheet));
+        resultFromGuideList.addAll(buildListParametersFromGuide(2, 19, length, 2, sheet));
+        resultFromGuideList.addAll(buildListParametersFromGuide(2, 17, length, 2, sheet));
+        resultFromGuideList.addAll(buildListParametersFromGuide(2, 20, length, 2, sheet));
+
+        Worksheet dopSheet = workbook.getWorksheets().get(1);
+        dopSheet.setName("Лист1");
+        dopSheet.insertArrayList(resultFromGuideList, 1, 1, true, true);
+    }
+
+    private ArrayList<String> buildListParametersFromGuide(int rowNumber,
+                                                           int columnNumber,
+                                                           int length,
+                                                           int step,
+                                                           Worksheet sheet) {
+        ArrayList<String> result = IntStream.range(rowNumber, length)
+                .mapToObj(i -> sheet.get(i, columnNumber)
+                        .getValue()).filter(value -> !EMPTY_STRING.equals(value)).distinct().collect(Collectors.toCollection(ArrayList::new));
+        IntStream.range(0, step).forEach(i -> result.add(EMPTY_STRING));
+        return result;
     }
 
     private String convertDateToDateTime(Date date) {
