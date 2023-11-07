@@ -8,11 +8,12 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     dec.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
     con.exploit_number AS "Идентификатор разрешительного органа",
     con.full_name AS "Наименование лицензирующего органа",
-    (SELECT CASE WHEN sub.code is null THEN la.rf_subject_id:: varchar ELSE sub.code END) AS "Код субъекта РФ",
+    (SELECT CASE WHEN sub.code is null THEN (select case when la.rf_subject_id::varchar is null
+        then (select nrscc.code from nsi.nsi_rf_subjects_codes nrscc where con.fed_subject_code_id = nrscc.id)
+        else la.rf_subject_id::varchar end ) ELSE sub.code END) AS "Код субъекта РФ",
     (SELECT CASE WHEN sub.name is null THEN
-    (
-    select nsisub.name from nsi.nsi_rf_subjects_codes nsisub where la.rf_subject_id = nsisub.id
-    )
+    (select case when (select nsisub.name from nsi.nsi_rf_subjects_codes nsisub where la.rf_subject_id = nsisub.id) is null
+     then (select nrsccs.name from nsi.nsi_rf_subjects_codes nrsccs where con.fed_subject_code_id = nrsccs.id) end )
     ELSE sub.name END
     ) AS "Субъект РФ",
     (select case when la.epgu_number is not null then 'Да' else 'Нет' end) AS "Направлено через ЕПГУ (Да/Нет)",
@@ -29,7 +30,8 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
     dec.object_create_date AS "Дата принятия решения",
-    license.temp_license_number AS "Регистрационный номер лицензии"
+    (select case when license.license_number is not null then license.license_number
+        else license.temp_license_number end ) AS "Регистрационный номер лицензии"
 from license.application la
     left join nsi.nsi_application_type nsiapp
 on la.application_type_id = nsiapp.id
