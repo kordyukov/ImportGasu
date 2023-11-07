@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.fors.itconsulting.importgasu.constant.Decision;
+import ru.fors.itconsulting.importgasu.maps.OrganizationCode;
 import ru.fors.itconsulting.importgasu.service.ImportGasuImpl;
 
 import java.io.IOException;
@@ -30,13 +31,26 @@ public class ImportGasuUtil {
         return EMPTY_STRING;
     }
 
-    public static Map<String, String> getDecisionMap() {
-        try (InputStream inputStreamFromDecision = ImportGasuImpl.class.getClassLoader().getResourceAsStream("decision.yaml")) {
+    public static Map<String, String> getDecisionMap(String fileName) {
+        try (InputStream inputStreamFromDecision = ImportGasuImpl.class.getClassLoader().getResourceAsStream(fileName)) {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             String paramFile = getQueryFromIs(inputStreamFromDecision);
             Decision decisionParameters = mapper.readValue(paramFile, Decision.class);
 
             return decisionParameters.getDecision();
+        } catch (IOException ignored) {
+
+        }
+        return emptyMap();
+    }
+
+    public static Map<String, String> getOrganizationsMap(String fileName) {
+        try (InputStream inputStreamFromDecision = ImportGasuImpl.class.getClassLoader().getResourceAsStream(fileName)) {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            String paramFile = getQueryFromIs(inputStreamFromDecision);
+            OrganizationCode decisionParameters = mapper.readValue(paramFile, OrganizationCode.class);
+
+            return decisionParameters.getOrganizationCode();
         } catch (IOException ignored) {
 
         }

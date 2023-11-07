@@ -38,8 +38,7 @@ import java.util.stream.IntStream;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
-import static ru.fors.itconsulting.importgasu.utils.ImportGasuUtil.getDecisionMap;
-import static ru.fors.itconsulting.importgasu.utils.ImportGasuUtil.getQueryFromIs;
+import static ru.fors.itconsulting.importgasu.utils.ImportGasuUtil.*;
 
 
 @Component
@@ -59,6 +58,10 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     private String outputFileName;
     @Value("${files.input-sql-query-application}")
     private String inputSqlQueryFromApplication;
+    @Value("${files.decision-map}")
+    private String decisionFileName;
+    @Value("${files.organization-code}")
+    private String organizationCodeFileName;
 
     public ImportGasuImpl(Properties properties) {
         this.properties = properties;
@@ -174,6 +177,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             sheet.setName("Данные о заявлениях, решения.");
 
             editDecisionsFromYaml(sheet);
+            editCodeFromOrganizations(sheet);
 
             buildGuideFromParameters(sheet, workbook);
 
@@ -198,8 +202,24 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         dopSheet.insertArrayList(resultFromGuideList, 1, 1, true, true);
     }
 
+    private void editCodeFromOrganizations(Worksheet sheet) {
+        Map<String, String> organizationsMap = getOrganizationsMap(organizationCodeFileName);
+        int length = sheet.getRows().length;
+        IntStream.range(2, length)
+                .forEach(i -> {
+                    String value = sheet.get(i, 9).getValue();
+
+                    if (value != null) {
+                        if (organizationsMap.containsKey(value.toLowerCase())) {
+                            sheet.get(i, 8).setValue(organizationsMap.get(value.toLowerCase()));
+                            log.info("complete to organizationsMap {}", value.toLowerCase());
+                        }
+                    }
+                });
+    }
+
     private void editDecisionsFromYaml(Worksheet sheet) {
-        Map<String, String> decisionMap = getDecisionMap();
+        Map<String, String> decisionMap = getDecisionMap(decisionFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
                 .forEach(i -> {
