@@ -173,7 +173,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             sheet.getAllocatedRange().autoFitColumns();
             sheet.setName("Данные о заявлениях, решения.");
 
-            editDecisionsFromYaml(sheet, 19);
+            editDecisionsFromYaml(sheet);
 
             buildGuideFromParameters(sheet, workbook);
 
@@ -198,12 +198,16 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         dopSheet.insertArrayList(resultFromGuideList, 1, 1, true, true);
     }
 
-    private void editDecisionsFromYaml(Worksheet sheet, int column) {
+    private void editDecisionsFromYaml(Worksheet sheet) {
         Map<String, String> decisionMap = getDecisionMap();
         int length = sheet.getRows().length;
         IntStream.range(2, length)
-                .forEach(i -> sheet.get(i,column).setValue(decisionMap.get(sheet.get(i,column).getValue())));
-
+                .forEach(i -> {
+                    String value = decisionMap.get(sheet.get(i, 19).getValue());
+                    if (value != null) {
+                        sheet.get(i, 19).setValue(value);
+                    }
+                });
     }
 
     private ArrayList<String> buildListParametersFromGuide(int rowNumber,
