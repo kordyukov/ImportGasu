@@ -212,7 +212,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                     if (value != null) {
                         if (organizationsMap.containsKey(value.toLowerCase())) {
                             sheet.get(i, 8).setValue(organizationsMap.get(value.toLowerCase()));
-                            log.info("complete to organizationsMap {}", value.toLowerCase());
+                            log.info("complete to organizationsMap {}", value);
                         }
                     }
                 });
