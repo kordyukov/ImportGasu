@@ -8,5 +8,4 @@ public class ImportGasuConstant {
     public static final String START_MESSAGE = "Старт выгрузки данных с %s, период с %s по %s";
     public static final String COMPLETE_MESSAGE = "Загрузка окончена, отчет в папке с программой по адресу: ";
     public static final String DESKTOP_IS_NO_SUPPORTED = "Рабочий стол не поддерживается!";
-    public static final String UNION_CONSTANT = "UNION";
 }

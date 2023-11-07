@@ -5,7 +5,6 @@ import com.spire.data.table.common.JdbcAdapter;
 import com.spire.xls.ExcelVersion;
 import com.spire.xls.Workbook;
 import com.spire.xls.Worksheet;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -24,7 +23,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -33,12 +31,15 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.*;
+import static ru.fors.itconsulting.importgasu.utils.ImportGasuUtil.getDecisionMap;
+import static ru.fors.itconsulting.importgasu.utils.ImportGasuUtil.getQueryFromIs;
 
 
 @Component
@@ -88,7 +89,6 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             window.add(databaseAddres, BorderLayout.LINE_START);
             window.add(panel, BorderLayout.AFTER_LAST_LINE);
-
             log.info("Конец загрузки приложения по выгрузке данных с {}", url);
         });
     }
@@ -135,7 +135,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             String selectedDateEnd = convertDateToDateTime((Date) datePickerEnd.getModel().getValue())
                     .formatted(END_SECONDS);
 
-            String query = getQuery(inputStreamFromApplication).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
+            String query = getQueryFromIs(inputStreamFromApplication).formatted(PERIOD_FROM_DATE.formatted(selectedDateBegin),
                     PERIOD_FROM_DATE.formatted(selectedDateEnd));
 
             log.info(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd));
@@ -152,16 +152,6 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
         }
 
-    }
-
-    private String getQuery(InputStream inputStream) {
-        try (StringWriter writer = new StringWriter()) {
-            IOUtils.copy(inputStream, writer, "UTF-8");
-            return writer.toString();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return EMPTY_STRING;
     }
 
     private void buildExelFileFromData(String query) throws Exception {
@@ -182,6 +172,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             sheet.insertDataTable(dataTable, true, 1, 1);
             sheet.getAllocatedRange().autoFitColumns();
             sheet.setName("Данные о заявлениях, решения.");
+
+            editDecisionsFromYaml(sheet, 19);
 
             buildGuideFromParameters(sheet, workbook);
 
@@ -204,6 +196,14 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         Worksheet dopSheet = workbook.getWorksheets().get(1);
         dopSheet.setName("Лист1");
         dopSheet.insertArrayList(resultFromGuideList, 1, 1, true, true);
+    }
+
+    private void editDecisionsFromYaml(Worksheet sheet, int column) {
+        Map<String, String> decisionMap = getDecisionMap();
+        int length = sheet.getRows().length;
+        IntStream.range(2, length)
+                .forEach(i -> sheet.get(i,column).setValue(decisionMap.get(sheet.get(i,column).getValue())));
+
     }
 
     private ArrayList<String> buildListParametersFromGuide(int rowNumber,
