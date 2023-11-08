@@ -4,17 +4,25 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     nsiact.erul_code AS "Идентификатор лицензируемого вида деятельности",
     nsiact.name AS "Наименование лицензируемого вида деятельности",
     la.registration_date AS "Дата подачи заявления",
-    refreas.object_create_date  AS "Дата уведомления заявителя о необходимости устранения",
+    decreturn.decision_return_date  AS "Дата уведомления заявителя о необходимости устранения",
     dec.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
     con.exploit_number AS "Идентификатор разрешительного органа",
     con.full_name AS "Наименование лицензирующего органа",
-    (SELECT CASE WHEN sub.code is null THEN (select case when la.rf_subject_id::varchar is null
-        then (select nrscc.code from nsi.nsi_rf_subjects_codes nrscc where con.fed_subject_code_id = nrscc.id)
-        else la.rf_subject_id::varchar end ) ELSE sub.code END) AS "Код субъекта РФ",
-    (SELECT CASE WHEN sub.name is null THEN
-    (select case when (select nsisub.name from nsi.nsi_rf_subjects_codes nsisub where la.rf_subject_id = nsisub.id) is null
-     then (select nrsccs.name from nsi.nsi_rf_subjects_codes nrsccs where con.fed_subject_code_id = nrsccs.id) end )
-    ELSE sub.name END
+    (
+    select case when nsisub.code is null
+     then (select case when sub.code is null then (select case when rfsappcon.code is null then fedappcon.code else rfsappcon.code end ) else sub.code end)
+        else (select case when nsisub.code is null then laaddrf.code else nsisub.code end )
+        end
+     ) AS "Код субъекта РФ",
+    (
+     select case when nsisub.name is null
+            then (select case when sub.name is null then (select case when rfsappcon.name is null
+                then (select case when fedappcon.name is null then beappcon.region_name else fedappcon.name end )
+                else rfsappcon.name end ) else sub.name end)
+            else (select case when nsisub.name is null then laaddrf.name else
+                (select case when nsisub.name is null then (select case when b4fiasid.region_name is null then b4code.region_name else b4fiasid.region_name end )
+                    else nsisub.name end ) end )
+            end
     ) AS "Субъект РФ",
     (select case when la.epgu_number is not null then 'Да' else 'Нет' end) AS "Направлено через ЕПГУ (Да/Нет)",
     (select case when contype.name is not null then contype.name
@@ -46,8 +54,18 @@ on la.application_type_id = nsiapp.id
     left join license.license license on dec.id = license.decision_id
     left join license.field_inspection isp on dec.id = isp.decision_id
     left join license.application_review_acceptance ara on la.id = ara.application_id
+    left join public.b4_fias_address b4code on lapp.legal_address_id = b4code.id
+    left join nsi.nsi_rf_subjects_codes nsisub on b4code.rf_subjects_codes_id = nsisub.id
+    left join profile.contragent appcon on appcon.id = lapp.contragent_id
+    left join public.b4_fias_address beappcon on appcon.legal_address_id = beappcon.id
+    left join nsi.nsi_rf_subjects_codes rfsappcon on beappcon.rf_subjects_codes_id = rfsappcon.id
+    left join nsi.nsi_rf_subjects_codes fedappcon on appcon.fed_subject_code_id = fedappcon.id
+    left join license.license_address laaddrappcon on license.id = laaddrappcon.license_id
+    left join public.b4_fias_address b4fiasid on laaddrappcon.fias_id = b4fiasid.id
+    left join nsi.nsi_rf_subjects_codes laaddrf on b4fiasid.rf_subjects_codes_id = laaddrf.id
+    left join license.decision_return decreturn on decreturn.application_id = la.id
 where la.object_deleted = false
   and la.registration_date between %s
   and %s
-order by la.input_application_number, nsiapp.name, con.full_name
+order by la.input_application_number, la.registration_date, nsiapp.name, con.full_name
 
