@@ -1,5 +1,6 @@
 package ru.fors.itconsulting.importgasu.service;
 
+import com.github.jknack.handlebars.internal.lang3.ArrayUtils;
 import com.spire.data.table.DataTable;
 import com.spire.data.table.common.JdbcAdapter;
 import com.spire.xls.ExcelVersion;
@@ -29,10 +30,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.Properties;
+import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -229,22 +228,29 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     private void editApplicationType(Worksheet sheet) {
         log.info("Start updated application types...");
         Map<String, String> applicationsMap = getApplicationsMap(applicationGuideFileName);
-        int length = sheet.getRows().length;
-        IntStream.range(2, length)
-                .forEach(i -> {
-                    String value = sheet.get(i, 2).getValue();
-                    log.info("application type: {}", value);
+        int length = sheet.getRows().length + 1;
 
-                    if (value != null) {
-                        if (applicationsMap.containsKey(value)) {
-                            sheet.get(i, 2).setValue(applicationsMap.get(value));
-                            log.info("update to applicationsMap {}", value);
-                        } else {
-                            sheet.deleteRow(i);
-                            log.info("delete to application type: {}, row: {}", value, i);
-                        }
-                    }
-                });
+        List<Integer> ids = new ArrayList<>();
+
+        IntStream.range(2, length).forEachOrdered(i -> {
+            String value = sheet.get(i, 2).getValue();
+            log.info("application type: {}", value);
+
+            if (value != null) {
+                String cleanValue = value.trim();
+
+                if (applicationsMap.containsKey(cleanValue)) {
+                    sheet.get(i, 2).setValue(applicationsMap.get(cleanValue));
+                    log.info("update to applicationsMap {}", applicationsMap.get(cleanValue));
+                } else {
+                    ids.add(i);
+                    log.info("delete to application type: {}, row: {}", value, i);
+                }
+            }
+        });
+
+        sheet.deleteRows(ArrayUtils.toPrimitive(ids.toArray(new Integer[0])));
+
         log.info("End updated application types!");
     }
 
