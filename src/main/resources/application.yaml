@@ -9,3 +9,5 @@ files:
   output-file-name: output/ExportToExcel.xlsx
   input-sql-query-application: application.sql
   input-sql-query-atomic-application: applicationAtomic.sql
+  decision-map: decision.yaml
+  organization-code: organization-code.yaml
