@@ -176,9 +176,6 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             sheet.getAllocatedRange().autoFitColumns();
             sheet.setName("Данные о заявлениях, решения.");
 
-            editDecisionsFromYaml(sheet);
-            editCodeFromOrganizations(sheet);
-
             buildGuideFromParameters(sheet, workbook);
 
             workbook.getWorksheets().get(2).remove();
@@ -189,6 +186,12 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     private void buildGuideFromParameters(Worksheet sheet, Workbook workbook) {
+        editDecisionsFromYaml(sheet);
+        editCodeFromOrganizations(sheet);
+        buildFromGuideList(sheet, workbook.getWorksheets().get(1));
+    }
+
+    private void buildFromGuideList(Worksheet sheet, Worksheet dopSheet) {
         int length = sheet.getRows().length;
         ArrayList<String> resultFromGuideList = buildListParametersFromGuide(1, 13, length, 2, sheet);
         resultFromGuideList.addAll(buildListParametersFromGuide(2, 2, length, 1, sheet));
@@ -197,8 +200,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         resultFromGuideList.addAll(buildListParametersFromGuide(2, 17, length, 2, sheet));
         resultFromGuideList.addAll(buildListParametersFromGuide(2, 20, length, 2, sheet));
 
-        Worksheet dopSheet = workbook.getWorksheets().get(1);
         dopSheet.setName("Лист1");
+
         dopSheet.insertArrayList(resultFromGuideList, 1, 1, true, true);
     }
 
