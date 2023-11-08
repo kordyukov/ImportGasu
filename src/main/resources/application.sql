@@ -38,7 +38,8 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
     dec.object_create_date AS "Дата принятия решения",
-    (select case when license.license_number is not null then license.license_number
+    (select case when license.license_number is not null then
+            license.license_number
         else license.temp_license_number end ) AS "Регистрационный номер лицензии"
 from license.application la
     left join nsi.nsi_application_type nsiapp
@@ -51,7 +52,8 @@ on la.application_type_id = nsiapp.id
     left join license.decision dec on la.id = dec.application_id
     left join license.decision_refusal_reason refreas on refreas.decision_id = dec.id
     left join nsi.nsi_refusal_reason rej on refreas.refusal_reason_id = rej.id
-    left join license.license license on dec.id = license.decision_id
+    left join license.license_for_application licforapp on licforapp.application_id = la.id
+    left join license.license license on licforapp.license_id = license.id
     left join license.field_inspection isp on dec.id = isp.decision_id
     left join license.application_review_acceptance ara on la.id = ara.application_id
     left join public.b4_fias_address b4code on lapp.legal_address_id = b4code.id
