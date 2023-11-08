@@ -5,7 +5,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.fors.itconsulting.importgasu.constant.Decision;
+import ru.fors.itconsulting.importgasu.maps.Applications;
+import ru.fors.itconsulting.importgasu.maps.Decision;
 import ru.fors.itconsulting.importgasu.maps.OrganizationCode;
 import ru.fors.itconsulting.importgasu.service.ImportGasuImpl;
 
@@ -45,14 +46,27 @@ public class ImportGasuUtil {
     }
 
     public static Map<String, String> getOrganizationsMap(String fileName) {
-        try (InputStream inputStreamFromDecision = ImportGasuImpl.class.getClassLoader().getResourceAsStream(fileName)) {
+        try (InputStream inputStreamFromOrganization = ImportGasuImpl.class.getClassLoader().getResourceAsStream(fileName)) {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            String paramFile = getQueryFromIs(inputStreamFromDecision);
+            String paramFile = getQueryFromIs(inputStreamFromOrganization);
             OrganizationCode decisionParameters = mapper.readValue(paramFile, OrganizationCode.class);
 
             return decisionParameters.getOrganizationCode();
         } catch (IOException ignored) {
 
+        }
+        return emptyMap();
+    }
+
+    public static Map<String, String> getApplicationsMap(String fileName) {
+        try (InputStream inputStreamFromApplication = ImportGasuImpl.class.getClassLoader().getResourceAsStream(fileName)) {
+            ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            String paramFile = getQueryFromIs(inputStreamFromApplication);
+            Applications applicationParameters = mapper.readValue(paramFile, Applications.class);
+
+            return applicationParameters.getApplications();
+        } catch (IOException ignored) {
+            ignored.printStackTrace();
         }
         return emptyMap();
     }

@@ -62,6 +62,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     private String decisionFileName;
     @Value("${files.organization-code}")
     private String organizationCodeFileName;
+    @Value("${files.application-guide}")
+    private String applicationGuideFileName;
 
     public ImportGasuImpl(Properties properties) {
         this.properties = properties;
@@ -186,8 +188,9 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     private void buildGuideFromParameters(Worksheet sheet, Workbook workbook) {
-        editDecisionsFromYaml(sheet);
+        editDecisionsType(sheet);
         editCodeFromOrganizations(sheet);
+        editApplicationType(sheet);
         buildFromGuideList(sheet, workbook.getWorksheets().get(1));
     }
 
@@ -206,31 +209,59 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     private void editCodeFromOrganizations(Worksheet sheet) {
+        log.info("Start updated application codes...");
         Map<String, String> organizationsMap = getOrganizationsMap(organizationCodeFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
                 .forEach(i -> {
                     String value = sheet.get(i, 9).getValue();
-
+                    log.info("organization code {}", value);
                     if (value != null) {
                         if (organizationsMap.containsKey(value.toLowerCase())) {
                             sheet.get(i, 8).setValue(organizationsMap.get(value.toLowerCase()));
-                            log.info("complete to organizationsMap {}", value);
+                            log.info("update to organization code {}", value);
                         }
                     }
                 });
+        log.info("End updated application codes!");
     }
 
-    private void editDecisionsFromYaml(Worksheet sheet) {
+    private void editApplicationType(Worksheet sheet) {
+        log.info("Start updated application types...");
+        Map<String, String> applicationsMap = getApplicationsMap(applicationGuideFileName);
+        int length = sheet.getRows().length;
+        IntStream.range(2, length)
+                .forEach(i -> {
+                    String value = sheet.get(i, 2).getValue();
+                    log.info("application type: {}", value);
+
+                    if (value != null) {
+                        if (applicationsMap.containsKey(value)) {
+                            sheet.get(i, 2).setValue(applicationsMap.get(value));
+                            log.info("update to applicationsMap {}", value);
+                        } else {
+                            sheet.deleteRow(i);
+                            log.info("delete to application type: {}, row: {}", value, i);
+                        }
+                    }
+                });
+        log.info("End updated application types!");
+    }
+
+    private void editDecisionsType(Worksheet sheet) {
+        log.info("Start updated decisions types...");
         Map<String, String> decisionMap = getDecisionMap(decisionFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
                 .forEach(i -> {
                     String value = decisionMap.get(sheet.get(i, 19).getValue());
+                    log.info("decision type {}", value);
                     if (value != null) {
                         sheet.get(i, 19).setValue(value);
+                        log.info("update to decision type {}", value);
                     }
                 });
+        log.info("End updated decisions types!");
     }
 
     private ArrayList<String> buildListParametersFromGuide(int rowNumber,

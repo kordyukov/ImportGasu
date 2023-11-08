@@ -1,4 +1,4 @@
-package ru.fors.itconsulting.importgasu.constant;
+package ru.fors.itconsulting.importgasu.maps;
 
 import lombok.Data;
 
