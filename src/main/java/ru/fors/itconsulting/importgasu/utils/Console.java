@@ -15,5 +15,7 @@ public class Console {
         console.setBounds(0, 0, 800, 500);
         console.setBackground(Color.BLACK);
         console.setForeground(Color.GREEN);
+        console.setLineWrap(true);
+        console.setWrapStyleWord(true);
     }
 }
