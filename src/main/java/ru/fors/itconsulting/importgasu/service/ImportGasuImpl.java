@@ -125,9 +125,9 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private JFrame initWindow() {
         JFrame window = new JFrame("ImportGasu приложение для загрузки отчета по лицензиям, база: " + url);
-        window.setBounds(50, 50, 1000, 300);
+        window.setBounds(50, 50, 800, 300);
         window.setVisible(true);
-        window.setResizable(false);
+        window.setResizable(true);
         window.setBackground(Color.GREEN);
         return window;
     }
