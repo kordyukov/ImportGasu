@@ -105,8 +105,9 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     private void appendAndUpdateConsole(String text) {
-        console.getConsole().append(addTextInConsole(text));
-        console.getConsole().updateUI();
+        JTextArea jTextArea = console.getConsole();
+        jTextArea.append(addTextInConsole(text));
+        jTextArea.setCaretPosition(jTextArea.getText().length() - 1);
     }
 
     private JPanel initPanel(JButton importButton,
