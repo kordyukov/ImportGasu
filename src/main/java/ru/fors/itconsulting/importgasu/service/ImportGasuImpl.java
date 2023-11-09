@@ -188,7 +188,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private void buildGuideFromParameters(Worksheet sheet, Workbook workbook) {
         editDecisionsType(sheet);
-        editCodeFromOrganizations(sheet);
+//TODO ставим по дефолту пока 00109
+//      editCodeFromOrganizations(sheet);
         editApplicationType(sheet);
         buildFromGuideList(sheet, workbook.getWorksheets().get(1));
     }
