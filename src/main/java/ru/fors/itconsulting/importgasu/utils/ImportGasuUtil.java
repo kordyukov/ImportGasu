@@ -18,7 +18,6 @@ import java.util.Map;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static java.util.Collections.emptyMap;
-import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.CONSOLE_TEXT;
 
 
 public class ImportGasuUtil {
@@ -74,7 +73,6 @@ public class ImportGasuUtil {
     }
 
     public static String addTextInConsole(String text) {
-        CONSOLE_TEXT += "\n" + new Date() + " " + text;
-        return CONSOLE_TEXT;
+        return "\n" + new Date() + " " + text;
     }
 }
