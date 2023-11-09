@@ -235,17 +235,17 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
         IntStream.range(2, length).forEachOrdered(i -> {
             String value = sheet.get(i, 2).getValue();
-            log.info("application type: {}", value);
+//            log.info("application type: {}", value);
 
             if (value != null) {
                 String cleanValue = value.trim();
 
                 if (applicationsMap.containsKey(cleanValue)) {
                     sheet.get(i, 2).setValue(applicationsMap.get(cleanValue));
-                    log.info("update to applicationsMap {}", applicationsMap.get(cleanValue));
+//                    log.info("update to applicationsMap {}", applicationsMap.get(cleanValue));
                 } else {
                     ids.add(i);
-                    log.info("delete to application type: {}, row: {}", value, i);
+//                    log.info("delete to application type: {}, row: {}", value, i);
                 }
             }
         });
@@ -262,10 +262,10 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         IntStream.range(2, length)
                 .forEach(i -> {
                     String value = decisionMap.get(sheet.get(i, 19).getValue());
-                    log.info("decision type {}", value);
+//                    log.info("decision type {}", value);
                     if (value != null) {
                         sheet.get(i, 19).setValue(value);
-                        log.info("update to decision type {}", value);
+//                        log.info("update to decision type {}", value);
                     }
                 });
         log.info("End updated decisions types!");
