@@ -1,5 +1,7 @@
 package ru.fors.itconsulting.importgasu.constant;
 
+import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
+
 public class ImportGasuConstant {
     public static final String PERIOD_FROM_DATE = "'%s'";
     public static final String BEGIN_SECONDS = "00:00:00.000000";
@@ -8,4 +10,5 @@ public class ImportGasuConstant {
     public static final String START_MESSAGE = "Старт выгрузки данных с %s, период с %s по %s";
     public static final String COMPLETE_MESSAGE = "Загрузка окончена, отчет в папке с программой по адресу: ";
     public static final String DESKTOP_IS_NO_SUPPORTED = "Рабочий стол не поддерживается!";
+    public static String CONSOLE_TEXT = EMPTY_STRING;
 }

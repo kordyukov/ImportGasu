@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import ru.fors.itconsulting.importgasu.config.DateLabelFormatter;
+import ru.fors.itconsulting.importgasu.utils.Console;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -44,6 +45,7 @@ import static ru.fors.itconsulting.importgasu.utils.ImportGasuUtil.*;
 public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportGasu {
     private static final Logger log = LoggerFactory.getLogger(ImportGasuImpl.class);
     private final Properties properties;
+    private final Console console;
 
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
@@ -64,9 +66,11 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     @Value("${files.application-guide}")
     private String applicationGuideFileName;
 
-    public ImportGasuImpl(Properties properties) {
+    public ImportGasuImpl(Properties properties, Console console) {
         this.properties = properties;
+        this.console = console;
     }
+
 
     @Override
     public void run(String... arg0) {
@@ -75,6 +79,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
         EventQueue.invokeLater(() -> {
             log.info("Старт загрузки приложения по выгрузке данных с {}", url);
+            console.getConsole().setText(addTextInConsole("Старт загрузки приложения по выгрузке данных с " + url));
 
             JPanel databaseAddres = new JPanel();
             JLabel urlText = new JLabel("Адрес базы: " + url);
@@ -91,9 +96,10 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             JFrame window = initWindow();
 
-            window.add(databaseAddres, BorderLayout.LINE_START);
+            window.getContentPane().add(console.getSp(), BorderLayout.CENTER);
             window.add(panel, BorderLayout.AFTER_LAST_LINE);
             log.info("Конец загрузки приложения по выгрузке данных с {}", url);
+            console.getConsole().setText(addTextInConsole("Конец загрузки приложения по выгрузке данных с " + url));
         });
     }
 
@@ -113,7 +119,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private JFrame initWindow() {
         JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
-        window.setBounds(50, 50, 1000, 100);
+        window.setBounds(50, 50, 1000, 300);
         window.setVisible(true);
         window.setResizable(false);
         window.setBackground(Color.GREEN);
@@ -143,6 +149,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                     PERIOD_FROM_DATE.formatted(selectedDateEnd));
 
             log.info(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd));
+            console.getConsole().setText(addTextInConsole(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd)));
 
             buildExelFileFromData(query);
             JOptionPane.showMessageDialog(null, COMPLETE_MESSAGE + outputFileName);
@@ -150,8 +157,11 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             openFile();
 
             log.info(COMPLETE_MESSAGE + outputFileName);
+            console.getConsole().setText(addTextInConsole(COMPLETE_MESSAGE + outputFileName));
+
         } catch (Exception e) {
             log.error(e.getMessage());
+            console.getConsole().setText(addTextInConsole(e.getMessage()));
             JOptionPane.showMessageDialog(null, e.getMessage());
 
         }
@@ -210,24 +220,25 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private void editCodeFromOrganizations(Worksheet sheet) {
         log.info("Start updated application codes...");
+        console.getConsole().setText(addTextInConsole("Start updated application codes..."));
         Map<String, String> organizationsMap = getOrganizationsMap(organizationCodeFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
                 .forEach(i -> {
                     String value = sheet.get(i, 9).getValue();
-                    log.info("organization code {}", value);
                     if (value != null) {
                         if (organizationsMap.containsKey(value.toLowerCase())) {
                             sheet.get(i, 8).setValue(organizationsMap.get(value.toLowerCase()));
-                            log.info("update to organization code {}", value);
                         }
                     }
                 });
         log.info("End updated application codes!");
+        console.getConsole().setText(addTextInConsole("End updated application codes!"));
     }
 
     private void editApplicationType(Worksheet sheet) {
         log.info("Start updated application types...");
+        console.getConsole().setText(addTextInConsole("Start updated application types..."));
         Map<String, String> applicationsMap = getApplicationsMap(applicationGuideFileName);
         int length = sheet.getRows().length + 1;
 
@@ -253,10 +264,12 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         sheet.deleteRows(ArrayUtils.toPrimitive(ids.toArray(new Integer[0])));
 
         log.info("End updated application types!");
+        console.getConsole().setText(addTextInConsole("End updated application types!"));
     }
 
     private void editDecisionsType(Worksheet sheet) {
         log.info("Start updated decisions types...");
+        console.getConsole().setText(addTextInConsole("Start updated decisions types..."));
         Map<String, String> decisionMap = getDecisionMap(decisionFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
@@ -269,6 +282,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                     }
                 });
         log.info("End updated decisions types!");
+        console.getConsole().setText(addTextInConsole("End updated decisions types!"));
     }
 
     private ArrayList<String> buildListParametersFromGuide(int rowNumber,
@@ -293,6 +307,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
         if (!Desktop.isDesktopSupported()) {
             log.error(DESKTOP_IS_NO_SUPPORTED);
+            console.getConsole().setText(addTextInConsole(DESKTOP_IS_NO_SUPPORTED));
             JOptionPane.showMessageDialog(null, DESKTOP_IS_NO_SUPPORTED);
 
             return;
@@ -309,10 +324,12 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             if (!success) {
                 log.info("Закройте отчет для загрузки нового!");
+                console.getConsole().setText(addTextInConsole("Закройте отчет для загрузки нового!"));
                 JOptionPane.showMessageDialog(null, "Закройте отчет для загрузки нового!");
             }
         } else {
-            log.info("Отчет отсутствуев в {}, загружаем...", outputFileName);
+            log.info("Отчет отсутствует в {}, загружаем...", outputFileName);
+            console.getConsole().setText(addTextInConsole("Отчет отсутствует в %s, загружаем...".formatted(outputFileName)));
         }
     }
 }

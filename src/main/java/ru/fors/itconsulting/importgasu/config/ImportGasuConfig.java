@@ -2,6 +2,7 @@ package ru.fors.itconsulting.importgasu.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.fors.itconsulting.importgasu.utils.Console;
 
 import java.util.Properties;
 
@@ -15,5 +16,10 @@ public class ImportGasuConfig {
         properties.put("text.year", "Year");
 
         return properties;
+    }
+
+    @Bean
+    public Console console() {
+        return new Console();
     }
 }

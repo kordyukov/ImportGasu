@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
 import static java.util.Collections.emptyMap;
+import static ru.fors.itconsulting.importgasu.constant.ImportGasuConstant.CONSOLE_TEXT;
 
 
 public class ImportGasuUtil {
@@ -69,5 +70,10 @@ public class ImportGasuUtil {
             ignored.printStackTrace();
         }
         return emptyMap();
+    }
+
+    public static String addTextInConsole(String text) {
+        CONSOLE_TEXT += "\n" + text;
+        return CONSOLE_TEXT;
     }
 }
