@@ -41,8 +41,12 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     (select case when license.license_number is not null
         then license.license_number
         else (select case when license.temp_license_number is not null then license.temp_license_number
-              else (select case when licdec.license_number is not null then licdec.license_number
-                  else licdec.temp_license_number end ) end ) end ) AS "Регистрационный номер лицензии"
+              else (select case when licdec.temp_license_number is not null then licdec.temp_license_number
+                  else (select case when licdec.license_number is not null then licdec.license_number
+                  else (select case when licterm.terminated_license_number is not null
+                      then licterm.terminated_license_number
+                           else
+                               licterm.terminated_temp_license_number end )  end ) end ) end ) end ) AS "Регистрационный номер лицензии"
 from license.application la
     left join nsi.nsi_application_type nsiapp
 on la.application_type_id = nsiapp.id
@@ -69,6 +73,7 @@ on la.application_type_id = nsiapp.id
     left join nsi.nsi_rf_subjects_codes fedappcon on appcon.fed_subject_code_id = fedappcon.id
     left join nsi.nsi_rf_subjects_codes laaddrf on b4fiasid.rf_subjects_codes_id = laaddrf.id
     left join license.decision_return decreturn on decreturn.application_id = la.id
+    left join license.license_for_termination licterm on la.id = licterm.application_id
 where la.object_deleted = false
   and la.registration_date between %s
   and %s
