@@ -9,20 +9,22 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     '00109' AS "Идентификатор разрешительного органа",
     con.full_name AS "Наименование лицензирующего органа",
     (
-    select case when nsisub.code is null
-     then (select case when sub.code is null then (select case when rfsappcon.code is null then fedappcon.code else rfsappcon.code end ) else sub.code end)
-        else (select case when nsisub.code is null then laaddrf.code else nsisub.code end )
-        end
+    select case when nsisub.code is not null
+     then nsisub.code else
+        (select case when sub.code is not null then sub.code
+          else (select case when rfsappcon.code is not null then rfsappcon.code
+              else (select case when fedappcon.code is not null then fedappcon.code
+                         else (select case when laaddrf.code is not null then laaddrf.code
+                             else '00' end ) end ) end ) end ) end
      ) AS "Код субъекта РФ",
     (
-     select case when nsisub.name is null
-            then (select case when sub.name is null then (select case when rfsappcon.name is null
-                then (select case when fedappcon.name is null then beappcon.region_name else fedappcon.name end )
-                else rfsappcon.name end ) else sub.name end)
-            else (select case when nsisub.name is null then laaddrf.name else
-                (select case when nsisub.name is null then (select case when b4fiasid.region_name is null then b4code.region_name else b4fiasid.region_name end )
-                    else nsisub.name end ) end )
-            end
+     select case when nsisub.name is not null
+      then nsisub.name else
+        (select case when sub.name is not null then sub.name
+           else (select case when rfsappcon.name is not null then rfsappcon.name
+               else (select case when fedappcon.name is not null then fedappcon.name
+                    else (select case when laaddrf.name is not null then laaddrf.name
+                        else 'Российская Федерация' end) end ) end ) end )  end
     ) AS "Субъект РФ",
     (select case when la.epgu_number is not null then 'Да' else 'Нет' end) AS "Направлено через ЕПГУ (Да/Нет)",
     (select case when contype.name is not null then contype.name
