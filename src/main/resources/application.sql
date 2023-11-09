@@ -4,8 +4,10 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     nsiact.erul_code AS "Идентификатор лицензируемого вида деятельности",
     nsiact.name AS "Наименование лицензируемого вида деятельности",
     la.registration_date AS "Дата подачи заявления",
-    decreturn.decision_return_date  AS "Дата уведомления заявителя о необходимости устранения",
-    ara.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
+--     decreturn.decision_return_date  AS "Дата уведомления заявителя о необходимости устранения",
+--     ara.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
+    ''  AS "Дата уведомления заявителя о необходимости устранения",
+    '' AS "Дата принятия решения лицензирующим органом о рассмотрении",
     '00109' AS "Идентификатор разрешительного органа",
     con.full_name AS "Наименование лицензирующего органа",
     (
@@ -39,7 +41,7 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
      else ara.object_create_date end) AS "Дата проведения проверки",
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
-    ord.object_create_date AS "Дата принятия решения",
+    ord.approval_date AS "Дата принятия решения",
     (select case when license.license_number is not null
         then license.license_number
         else (select case when license.temp_license_number is not null then license.temp_license_number
