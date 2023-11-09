@@ -5,7 +5,7 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
     nsiact.name AS "Наименование лицензируемого вида деятельности",
     la.registration_date AS "Дата подачи заявления",
     decreturn.decision_return_date  AS "Дата уведомления заявителя о необходимости устранения",
-    dec.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
+    ara.object_create_date AS "Дата принятия решения лицензирующим органом о рассмотрении",
     '00109' AS "Идентификатор разрешительного органа",
     con.full_name AS "Наименование лицензирующего органа",
     (
@@ -39,7 +39,7 @@ on(la.input_application_number) la.input_application_number AS "Уникальн
      else ara.object_create_date end) AS "Дата проведения проверки",
     (select decision.name from nsi.nsi_decision_result decision where dec.decision_result_id = decision.id) AS "Решение",
     rej.name AS "Причина отказа",
-    dec.object_create_date AS "Дата принятия решения",
+    ord.object_create_date AS "Дата принятия решения",
     (select case when license.license_number is not null
         then license.license_number
         else (select case when license.temp_license_number is not null then license.temp_license_number
@@ -77,6 +77,8 @@ on la.application_type_id = nsiapp.id
     left join nsi.nsi_rf_subjects_codes laaddrf on b4fiasid.rf_subjects_codes_id = laaddrf.id
     left join license.decision_return decreturn on decreturn.application_id = la.id
     left join license.license_for_termination licterm on la.id = licterm.application_id
+    left join license.order_for_decision orddec on dec.id = orddec.decision_id
+    left join license.order ord on orddec.order_id = ord.id
 where la.object_deleted = false and status.name <> 'Удалено' and status.name <> 'Рассмотрение прекращено'
   and la.registration_date between %s
   and %s
