@@ -118,7 +118,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     private JFrame initWindow() {
-        JFrame window = new JFrame("ImportGasu приложение для импорта, база: " + url);
+        JFrame window = new JFrame("ImportGasu приложение для загрузки отчета по лицензиям, база: " + url);
         window.setBounds(50, 50, 1000, 300);
         window.setVisible(true);
         window.setResizable(false);
@@ -219,8 +219,8 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     }
 
     private void editCodeFromOrganizations(Worksheet sheet) {
-        log.info("Start updated application codes...");
-        console.getConsole().setText(addTextInConsole("Start updated application codes..."));
+        log.info(START_UPDATE_TYPE_ORG);
+        console.getConsole().setText(addTextInConsole(START_UPDATE_TYPE_ORG));
         Map<String, String> organizationsMap = getOrganizationsMap(organizationCodeFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
@@ -232,13 +232,13 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                         }
                     }
                 });
-        log.info("End updated application codes!");
-        console.getConsole().setText(addTextInConsole("End updated application codes!"));
+        log.info(END_UPDATE_TYPE_ORG);
+        console.getConsole().setText(addTextInConsole(END_UPDATE_TYPE_ORG));
     }
 
     private void editApplicationType(Worksheet sheet) {
-        log.info("Start updated application types...");
-        console.getConsole().setText(addTextInConsole("Start updated application types..."));
+        log.info(START_UPDATE_TYPE_APP);
+        console.getConsole().setText(addTextInConsole(START_UPDATE_TYPE_APP));
         Map<String, String> applicationsMap = getApplicationsMap(applicationGuideFileName);
         int length = sheet.getRows().length + 1;
 
@@ -246,43 +246,45 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
         IntStream.range(2, length).forEachOrdered(i -> {
             String value = sheet.get(i, 2).getValue();
-//            log.info("application type: {}", value);
-
+            log.info("Тип заявления: {}", value);
+            console.getConsole().setText(addTextInConsole("Тип заявления: " + value));
             if (value != null) {
                 String cleanValue = value.trim();
 
                 if (applicationsMap.containsKey(cleanValue)) {
                     sheet.get(i, 2).setValue(applicationsMap.get(cleanValue));
-//                    log.info("update to applicationsMap {}", applicationsMap.get(cleanValue));
+                    log.info("Обновление типа заявления {}", applicationsMap.get(cleanValue));
+                    console.getConsole().setText(addTextInConsole("Обновление типа заявления " + applicationsMap.get(cleanValue)));
                 } else {
                     ids.add(i);
-//                    log.info("delete to application type: {}, row: {}", value, i);
+                    log.info("Сохранение индекса неактуального типа заявления: {}, row: {}", value, i);
+                    console.getConsole().setText(addTextInConsole("Сохранение индекса неактуального типа заявления: %s, строка: %s".formatted(value, i)));
                 }
             }
         });
 
         sheet.deleteRows(ArrayUtils.toPrimitive(ids.toArray(new Integer[0])));
 
-        log.info("End updated application types!");
-        console.getConsole().setText(addTextInConsole("End updated application types!"));
+        log.info(END_UPDATE_TYPE_APP);
+        console.getConsole().setText(addTextInConsole(END_UPDATE_TYPE_APP));
     }
 
     private void editDecisionsType(Worksheet sheet) {
-        log.info("Start updated decisions types...");
-        console.getConsole().setText(addTextInConsole("Start updated decisions types..."));
+        log.info(START_UPDATE_TYPE_DECISION);
+        console.getConsole().setText(addTextInConsole(START_UPDATE_TYPE_DECISION));
         Map<String, String> decisionMap = getDecisionMap(decisionFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
                 .forEach(i -> {
                     String value = decisionMap.get(sheet.get(i, 19).getValue());
-//                    log.info("decision type {}", value);
+                    log.info("Тип решения %s".formatted(value));
                     if (value != null) {
                         sheet.get(i, 19).setValue(value);
-//                        log.info("update to decision type {}", value);
+                        log.info("Обновления типа решения %s".formatted(value));
                     }
                 });
-        log.info("End updated decisions types!");
-        console.getConsole().setText(addTextInConsole("End updated decisions types!"));
+        log.info(END_UPDATE_TYPE_DECISION);
+        console.getConsole().setText(addTextInConsole(END_UPDATE_TYPE_DECISION));
     }
 
     private ArrayList<String> buildListParametersFromGuide(int rowNumber,
@@ -323,9 +325,9 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             boolean success = fileToDelete.delete();
 
             if (!success) {
-                log.info("Закройте отчет для загрузки нового!");
-                console.getConsole().setText(addTextInConsole("Закройте отчет для загрузки нового!"));
-                JOptionPane.showMessageDialog(null, "Закройте отчет для загрузки нового!");
+                log.info(CLOSE_REPORT_MESSAGE);
+                console.getConsole().setText(addTextInConsole(CLOSE_REPORT_MESSAGE));
+                JOptionPane.showMessageDialog(null, CLOSE_REPORT_MESSAGE);
             }
         } else {
             log.info("Отчет отсутствует в {}, загружаем...", outputFileName);

@@ -1,7 +1,5 @@
 package ru.fors.itconsulting.importgasu.constant;
 
-import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
-
 public class ImportGasuConstant {
     public static final String PERIOD_FROM_DATE = "'%s'";
     public static final String BEGIN_SECONDS = "00:00:00.000000";
@@ -10,5 +8,12 @@ public class ImportGasuConstant {
     public static final String START_MESSAGE = "Старт выгрузки данных с %s, период с %s по %s";
     public static final String COMPLETE_MESSAGE = "Загрузка окончена, отчет в папке с программой по адресу: ";
     public static final String DESKTOP_IS_NO_SUPPORTED = "Рабочий стол не поддерживается!";
-    public static String CONSOLE_TEXT = EMPTY_STRING;
+    public static String CONSOLE_TEXT = "=====================ImportGasu приложение для загрузки отчета по лицензиям 2023 ================\n";
+    public static String START_UPDATE_TYPE_ORG = "Начало обновления кодов лицензирующих органов...";
+    public static String END_UPDATE_TYPE_ORG = "Конец обновления кодов лицензирующих органов...";
+    public static String START_UPDATE_TYPE_APP = "Начало обновления типов заявлений...";
+    public static String END_UPDATE_TYPE_APP = "Конец обновления типов заявлений...";
+    public static String START_UPDATE_TYPE_DECISION = "Начало обновления типов решений...";
+    public static String END_UPDATE_TYPE_DECISION = "Конец обновления типов решений...";
+    public static String CLOSE_REPORT_MESSAGE = "Закройте отчет для загрузки нового!";
 }

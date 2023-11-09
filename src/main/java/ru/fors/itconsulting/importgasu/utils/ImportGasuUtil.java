@@ -13,6 +13,7 @@ import ru.fors.itconsulting.importgasu.service.ImportGasuImpl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.Map;
 
 import static ch.qos.logback.core.CoreConstants.EMPTY_STRING;
@@ -73,7 +74,7 @@ public class ImportGasuUtil {
     }
 
     public static String addTextInConsole(String text) {
-        CONSOLE_TEXT += "\n" + text;
+        CONSOLE_TEXT += "\n" + new Date() + " " + text;
         return CONSOLE_TEXT;
     }
 }
