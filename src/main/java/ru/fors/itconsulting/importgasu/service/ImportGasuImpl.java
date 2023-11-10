@@ -208,6 +208,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     private void updateFrameFromLog() {
         JTextArea jTextArea = console.getConsole();
+        jTextArea.setCaretPosition(jTextArea.getDocument().getLength());
         jTextArea.update(jTextArea.getGraphics());
     }
 
