@@ -158,7 +158,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             log.info(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd));
             appendAndUpdateConsole(START_MESSAGE.formatted(url, selectedDateBegin, selectedDateEnd));
-            updateFrameFromLog(console.getConsole());
+            updateFrameFromLog();
 
             buildExelFileFromData(query);
             JOptionPane.showMessageDialog(null, COMPLETE_MESSAGE + outputFileName);
@@ -167,11 +167,11 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
             log.info(COMPLETE_MESSAGE + outputFileName);
             appendAndUpdateConsole(COMPLETE_MESSAGE + outputFileName);
-            updateFrameFromLog(console.getConsole());
+            updateFrameFromLog();
         } catch (Exception e) {
             log.error(e.getMessage());
             appendAndUpdateConsole(e.getMessage());
-            updateFrameFromLog(console.getConsole());
+            updateFrameFromLog();
             JOptionPane.showMessageDialog(null, e.getMessage());
 
         }
@@ -206,8 +206,9 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
     }
 
-    private void updateFrameFromLog(JTextArea window) {
-        window.update(window.getGraphics());
+    private void updateFrameFromLog() {
+        JTextArea jTextArea = console.getConsole();
+        jTextArea.update(jTextArea.getGraphics());
     }
 
     private void buildGuideFromParameters(Worksheet sheet, Workbook workbook) {
@@ -235,7 +236,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
     private void editCodeFromOrganizations(Worksheet sheet) {
         log.info(START_UPDATE_TYPE_ORG);
         appendAndUpdateConsole(START_UPDATE_TYPE_ORG);
-        updateFrameFromLog(console.getConsole());
+        updateFrameFromLog();
         Map<String, String> organizationsMap = getOrganizationsMap(organizationCodeFileName);
         int length = sheet.getRows().length;
         IntStream.range(2, length)
@@ -249,13 +250,13 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                 });
         log.info(END_UPDATE_TYPE_ORG);
         appendAndUpdateConsole(END_UPDATE_TYPE_ORG);
-        updateFrameFromLog(console.getConsole());
+        updateFrameFromLog();
     }
 
     private void editApplicationType(Worksheet sheet) {
         log.info(START_UPDATE_TYPE_APP);
         appendAndUpdateConsole(START_UPDATE_TYPE_APP);
-        updateFrameFromLog(console.getConsole());
+        updateFrameFromLog();
         Map<String, String> applicationsMap = getApplicationsMap(applicationGuideFileName);
         int length = sheet.getRows().length + 1;
 
@@ -265,7 +266,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             String value = sheet.get(i, 2).getValue();
             log.info("Тип заявления: {}", value);
             appendAndUpdateConsole("Тип заявления: " + value);
-            updateFrameFromLog(console.getConsole());
+            updateFrameFromLog();
             if (value != null) {
                 String cleanValue = value.trim();
 
@@ -273,12 +274,12 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                     sheet.get(i, 2).setValue(applicationsMap.get(cleanValue));
                     log.info("Обновление типа заявления {}", applicationsMap.get(cleanValue));
                     appendAndUpdateConsole("Обновление типа заявления " + applicationsMap.get(cleanValue));
-                    updateFrameFromLog(console.getConsole());
+                    updateFrameFromLog();
                 } else {
                     ids.add(i);
                     log.info("Сохранение индекса неактуального типа заявления: {}, row: {}", value, i);
                     appendAndUpdateConsole("Сохранение индекса неактуального типа заявления: %s, строка: %s".formatted(value, i));
-                    updateFrameFromLog(console.getConsole());
+                    updateFrameFromLog();
                 }
             }
         });
@@ -287,13 +288,13 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
 
         log.info(END_UPDATE_TYPE_APP);
         appendAndUpdateConsole(END_UPDATE_TYPE_APP);
-        updateFrameFromLog(console.getConsole());
+        updateFrameFromLog();
     }
 
     private void editDecisionsType(Worksheet sheet) {
         log.info(START_UPDATE_TYPE_DECISION);
         appendAndUpdateConsole(START_UPDATE_TYPE_DECISION);
-        updateFrameFromLog(console.getConsole());
+        updateFrameFromLog();
 
         Map<String, String> decisionMap = getDecisionMap(decisionFileName);
         int length = sheet.getRows().length;
@@ -302,17 +303,17 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
                     String value = decisionMap.get(sheet.get(i, 19).getValue());
                     log.info("Тип решения %s".formatted(value));
                     appendAndUpdateConsole("Тип решения %s".formatted(value));
-                    updateFrameFromLog(console.getConsole());
+                    updateFrameFromLog();
                     if (value != null) {
                         sheet.get(i, 19).setValue(value);
                         log.info("Обновления типа решения %s".formatted(value));
                         appendAndUpdateConsole("Обновления типа решения %s".formatted(value));
-                        updateFrameFromLog(console.getConsole());
+                        updateFrameFromLog();
                     }
                 });
         log.info(END_UPDATE_TYPE_DECISION);
         appendAndUpdateConsole(END_UPDATE_TYPE_DECISION);
-        updateFrameFromLog(console.getConsole());
+        updateFrameFromLog();
     }
 
     private ArrayList<String> buildListParametersFromGuide(int rowNumber,
@@ -338,7 +339,7 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
         if (!Desktop.isDesktopSupported()) {
             log.error(DESKTOP_IS_NO_SUPPORTED);
             appendAndUpdateConsole(DESKTOP_IS_NO_SUPPORTED);
-            updateFrameFromLog(console.getConsole());
+            updateFrameFromLog();
             JOptionPane.showMessageDialog(null, DESKTOP_IS_NO_SUPPORTED);
 
             return;
@@ -356,13 +357,13 @@ public class ImportGasuImpl extends JFrame implements CommandLineRunner, ImportG
             if (!success) {
                 log.info(CLOSE_REPORT_MESSAGE);
                 appendAndUpdateConsole(CLOSE_REPORT_MESSAGE);
-                updateFrameFromLog(console.getConsole());
+                updateFrameFromLog();
                 JOptionPane.showMessageDialog(null, CLOSE_REPORT_MESSAGE);
             }
         } else {
             log.info("Отчет отсутствует в {}, загружаем...", outputFileName);
             appendAndUpdateConsole("Отчет отсутствует в %s, загружаем...".formatted(outputFileName));
-            updateFrameFromLog(console.getConsole());
+            updateFrameFromLog();
         }
     }
 }
