@@ -82,6 +82,7 @@ on la.application_type_id = nsiapp.id
     left join license.order_for_decision orddec on dec.id = orddec.decision_id
     left join license.order ord on orddec.order_id = ord.id
 where la.object_deleted = false and status.name <> 'Удалено' and status.name <> 'Рассмотрение прекращено'
+          and ord.approval_date is not null
   and la.registration_date between %s
   and %s
 order by la.input_application_number, la.registration_date, nsiapp.name, con.full_name
